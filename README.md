@@ -6,8 +6,9 @@ in need across Kittitas and Yakima counties, Washington.
 **This repo is the deployed site only** (three static files, no build step),
 served via GitHub Pages. Data lives in a read-only ArcGIS hosted feature
 layer; the pipeline that discovers, verifies, and publishes the data is
-maintained privately. Every record is human-reviewed against its source
-before it appears here.
+maintained privately. A human approves every record before it's published,
+and effort is made to check each one against its source — but information
+may still be wrong or out of date. Please call ahead to confirm.
 
 - Hours are shown in Pacific time; open/closed is computed in the browser
   with [opening_hours.js](https://github.com/opening-hours/opening_hours.js).
