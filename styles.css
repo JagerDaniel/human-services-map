@@ -34,6 +34,16 @@ header { padding: 0.75rem 1rem 0.25rem; }
 h1 { font-size: 1.25rem; margin: 0; }
 .tagline { margin: 0.15rem 0 0; color: #444; font-size: 0.95rem; }
 
+.disclaimer {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.7rem;
+  background: #fdf3e7;
+  border-left: 4px solid var(--housing);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.disclaimer strong { display: block; margin-bottom: 0.1rem; }
+
 /* --- controls --- */
 
 .controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); }
