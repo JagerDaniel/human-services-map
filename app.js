@@ -34,24 +34,33 @@ const CATEGORY_COLOR = {
   mental_health: "#6a1b9a",
 };
 
-/* Map-pin / dot glyphs — built from plain SVG primitives (rect/circle/polygon)
- * rather than hand-tuned bezier paths, so they render correctly without
- * visual tuning: a shopping bag (food), a house (housing), a heart
- * (mental health). White on the category color, inside a circle. */
+/* Map-pin / dot glyphs — built from plain SVG primitives (rect/circle/
+ * polygon/ellipse) rather than hand-tuned bezier paths, so they render
+ * correctly without visual tuning: an apple (food — symbolic of the Yakima
+ * Valley's orchards), a house (housing), a heart (mental health). White on
+ * the category color, inside a circle. Each entry is a function of the pin
+ * color so a glyph can "cut" a same-color notch (see the apple's stem dimple)
+ * that always matches its own pin, even if CATEGORY_COLOR changes later. */
 const CATEGORY_ICON_MARKUP = {
-  food: '<rect x="6.3" y="9" width="11.4" height="9.5" rx="1.4" fill="white"/>'
-      + '<path d="M9 9a3 3.6 0 0 1 6 0" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
-  housing: '<polygon points="12,4.7 19,11 17,11 17,19 13.2,19 13.2,14.5 10.8,14.5 10.8,19 7,19 7,11 5,11" fill="white"/>',
-  mental_health: '<circle cx="9" cy="10" r="3.1" fill="white"/><circle cx="15" cy="10" r="3.1" fill="white"/>'
-      + '<polygon points="6.4,11.1 17.6,11.1 12,19" fill="white"/>',
+  food: (color) =>
+      '<circle cx="12" cy="13.5" r="6" fill="white"/>'          // apple body
+    + `<circle cx="12" cy="8" r="2.3" fill="${color}"/>`        // top notch (cut to match the pin)
+    + '<rect x="11.3" y="4" width="1.4" height="4.5" rx="0.7" fill="white"/>'  // stem
+    + '<ellipse cx="14.5" cy="5.3" rx="2.1" ry="1.1" fill="white" transform="rotate(35 14.5 5.3)"/>', // leaf
+  housing: () =>
+      '<polygon points="12,4.7 19,11 17,11 17,19 13.2,19 13.2,14.5 10.8,14.5 10.8,19 7,19 7,11 5,11" fill="white"/>',
+  mental_health: () =>
+      '<circle cx="9" cy="10" r="3.1" fill="white"/><circle cx="15" cy="10" r="3.1" fill="white"/>'
+    + '<polygon points="6.4,11.1 17.6,11.1 12,19" fill="white"/>',
 };
 
 function pinSvgMarkup(category, diameter) {
   const color = CATEGORY_COLOR[category] || "#555";
   const r = 10.5;
+  const glyph = CATEGORY_ICON_MARKUP[category] ? CATEGORY_ICON_MARKUP[category](color) : "";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${diameter}" height="${diameter}" viewBox="0 0 24 24">`
     + `<circle cx="12" cy="12" r="${r}" fill="${color}" stroke="white" stroke-width="1.5"/>`
-    + (CATEGORY_ICON_MARKUP[category] || "")
+    + glyph
     + `</svg>`;
 }
 
