@@ -72,10 +72,12 @@ h1 { font-size: 1.25rem; margin: 0; }
 .cat-btn.is-on { background: #fff; color: var(--ink); border-color: #555; }
 .cat-btn:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
 
-.dot { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; }
-.dot-food { background: var(--food); }
-.dot-housing { background: var(--housing); }
-.dot-mental { background: var(--mental); }
+/* Filled in by JS with the same icon used for the matching map pin
+   (background-image, set per data-category — see app.js). */
+.dot {
+  width: 1.15rem; height: 1.15rem; display: inline-block;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
 .cat-btn:not(.is-on) .dot { opacity: 0.35; }
 
 .hide-closed {
@@ -85,17 +87,42 @@ h1 { font-size: 1.25rem; margin: 0; }
 .hide-closed input { width: 1.25rem; height: 1.25rem; }
 .fail-open-note { margin: 0.25rem 0 0; font-size: 0.85rem; color: #555; }
 
-/* --- layout: map + list --- */
+/* --- layout: map + controls + list ---
+   Mobile: stacked in DOM order (map, controls, list) via plain flex-column.
+   Desktop: a grid puts controls directly above the list in a sidebar column,
+   freeing the map to span the full column height instead of sharing a
+   full-width control bar with the list. */
 
-main { display: flex; flex-direction: column; }
-#mapView { height: 45vh; min-height: 280px; }
-#list { padding: 0.75rem 1rem 2rem; }
+/* Explicit grid areas at both breakpoints (not DOM order) so "controls"
+   can sit before the map on mobile, but beside the list on desktop. */
+main {
+  display: grid;
+  grid-template-areas: "controls" "map" "list";
+  grid-template-rows: auto 45vh 1fr;
+}
+#mapView { grid-area: map; min-height: 280px; }
+.controls { grid-area: controls; }
+#list { grid-area: list; padding: 0.75rem 1rem 2rem; }
 #status { font-weight: 600; }
 
 @media (min-width: 900px) {
-  main { flex-direction: row; height: calc(100vh - 170px); }
-  #mapView { flex: 1.2; height: auto; }
-  #list { flex: 1; overflow-y: auto; }
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; }
+  header, footer { flex: 0 0 auto; }
+
+  main {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: 1.6fr 1fr;
+    grid-template-areas: "map controls" "map list";
+    grid-template-rows: auto 1fr;
+  }
+  #mapView { min-height: 0; }
+  .controls {
+    border-left: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  #list { overflow-y: auto; border-left: 1px solid var(--line); }
 }
 
 /* --- cards --- */

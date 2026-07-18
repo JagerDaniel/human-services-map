@@ -34,6 +34,31 @@ const CATEGORY_COLOR = {
   mental_health: "#6a1b9a",
 };
 
+/* Map-pin / dot glyphs — built from plain SVG primitives (rect/circle/polygon)
+ * rather than hand-tuned bezier paths, so they render correctly without
+ * visual tuning: a shopping bag (food), a house (housing), a heart
+ * (mental health). White on the category color, inside a circle. */
+const CATEGORY_ICON_MARKUP = {
+  food: '<rect x="6.3" y="9" width="11.4" height="9.5" rx="1.4" fill="white"/>'
+      + '<path d="M9 9a3 3.6 0 0 1 6 0" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
+  housing: '<polygon points="12,4.7 19,11 17,11 17,19 13.2,19 13.2,14.5 10.8,14.5 10.8,19 7,19 7,11 5,11" fill="white"/>',
+  mental_health: '<circle cx="9" cy="10" r="3.1" fill="white"/><circle cx="15" cy="10" r="3.1" fill="white"/>'
+      + '<polygon points="6.4,11.1 17.6,11.1 12,19" fill="white"/>',
+};
+
+function pinSvgMarkup(category, diameter) {
+  const color = CATEGORY_COLOR[category] || "#555";
+  const r = 10.5;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${diameter}" height="${diameter}" viewBox="0 0 24 24">`
+    + `<circle cx="12" cy="12" r="${r}" fill="${color}" stroke="white" stroke-width="1.5"/>`
+    + (CATEGORY_ICON_MARKUP[category] || "")
+    + `</svg>`;
+}
+
+function pinDataUri(category, diameter = 30) {
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(pinSvgMarkup(category, diameter));
+}
+
 /* ---------- time: pin evaluation to Pacific ---------- */
 
 function pacificNow() {
@@ -268,6 +293,12 @@ function refresh() {
 
 /* ---------- wiring ---------- */
 
+// Filter-button dots use the exact same glyphs as the map pins, so the
+// legend and the map teach each other.
+document.querySelectorAll(".dot[data-category]").forEach((dot) => {
+  dot.style.backgroundImage = `url("${pinDataUri(dot.dataset.category, 20)}")`;
+});
+
 document.querySelectorAll(".cat-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const cat = btn.dataset.category;
@@ -294,29 +325,53 @@ document.getElementById("searchInput").addEventListener("input", (ev) => {
 require([
   "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer",
 ], (Map, MapView, FeatureLayer) => {
+  // County outlines (Kittitas + Yakima, WA) — US Census TIGERweb, the same
+  // authoritative source the wrapper's geocoder already trusts for the
+  // geofence. Outline only (no fill) so it never obscures the basemap or
+  // service points; drawn first so it sits below everything else.
+  const countyLayer = new FeatureLayer({
+    url: "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1",
+    definitionExpression: "STATE='53' AND (BASENAME='Kittitas' OR BASENAME='Yakima')",
+    outFields: ["BASENAME"],
+    // TIGERweb ships this sublayer with its own minScale/maxScale (tuned for
+    // its reference-map context) that suspends rendering at our normal
+    // browsing zoom. 0 = no restriction, so it's always visible here.
+    minScale: 0,
+    maxScale: 0,
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-fill",
+        color: [0, 0, 0, 0],
+        outline: { color: "#5f6368", width: 1.5, style: "short-dash" },
+      },
+    },
+    popupEnabled: false,
+  });
+
   const layer = new FeatureLayer({
     url: CONFIG.layerUrl,
     outFields: ["*"],
     renderer: {
       type: "unique-value",
       field: "category",
-      uniqueValueInfos: Object.entries(CATEGORY_COLOR).map(([value, color]) => ({
+      uniqueValueInfos: Object.keys(CATEGORY_COLOR).map((value) => ({
         value,
-        symbol: {
-          type: "simple-marker", color, size: 11,
-          outline: { color: "white", width: 1.5 },
-        },
+        symbol: { type: "picture-marker", url: pinDataUri(value, 30), width: "30px", height: "30px" },
       })),
     },
     popupEnabled: false, // detail lives in the injection-safe cards
   });
 
-  const map = new Map({ basemap: "streets-navigation-vector", layers: [layer] });
+  const map = new Map({ basemap: "streets-navigation-vector", layers: [countyLayer, layer] });
   mapView = new MapView({
     container: "mapView", map,
     center: CONFIG.center, zoom: CONFIG.zoom,
     constraints: { minZoom: 7 },
   });
+  // Exposed for console debugging only (e.g. window.__debugView.goTo(...)).
+  // No secrets here — these are just the public ArcGIS view/layer objects.
+  window.__debugMap = map; window.__debugView = mapView; window.__debugCountyLayer = countyLayer;
 
   mapView.whenLayerView(layer).then((lv) => { layerView = lv; applyMapFilter(); });
 

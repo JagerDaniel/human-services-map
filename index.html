@@ -45,32 +45,31 @@
     </p>
   </header>
 
-  <nav class="controls" aria-label="Filter services">
-    <div class="search-box">
-      <label for="searchInput" class="visually-hidden">Search services</label>
-      <input id="searchInput" type="search" autocomplete="off"
-             placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
-    </div>
-    <div class="category-buttons" role="group" aria-label="Show categories">
-      <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
-        <span class="dot dot-food" aria-hidden="true"></span>Food
-      </button>
-      <button type="button" class="cat-btn is-on" data-category="housing" aria-pressed="true">
-        <span class="dot dot-housing" aria-hidden="true"></span>Housing
-      </button>
-      <button type="button" class="cat-btn is-on" data-category="mental_health" aria-pressed="true">
-        <span class="dot dot-mental" aria-hidden="true"></span>Mental health
-      </button>
-    </div>
-    <label class="hide-closed">
-      <input type="checkbox" id="hideClosed" />
-      Hide places closed right now
-    </label>
-    <p class="fail-open-note">Places with unknown hours are always shown.</p>
-  </nav>
-
   <main>
     <div id="mapView" aria-label="Map of services"></div>
+    <nav class="controls" aria-label="Filter services">
+      <div class="search-box">
+        <label for="searchInput" class="visually-hidden">Search services</label>
+        <input id="searchInput" type="search" autocomplete="off"
+               placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
+      </div>
+      <div class="category-buttons" role="group" aria-label="Show categories">
+        <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
+          <span class="dot" data-category="food" aria-hidden="true"></span>Food
+        </button>
+        <button type="button" class="cat-btn is-on" data-category="housing" aria-pressed="true">
+          <span class="dot" data-category="housing" aria-hidden="true"></span>Housing
+        </button>
+        <button type="button" class="cat-btn is-on" data-category="mental_health" aria-pressed="true">
+          <span class="dot" data-category="mental_health" aria-hidden="true"></span>Mental health
+        </button>
+      </div>
+      <label class="hide-closed">
+        <input type="checkbox" id="hideClosed" />
+        Hide places closed right now
+      </label>
+      <p class="fail-open-note">Places with unknown hours are always shown.</p>
+    </nav>
     <section id="list" aria-label="List of services">
       <p id="status" role="status">Loading services…</p>
       <div id="cards"></div>
