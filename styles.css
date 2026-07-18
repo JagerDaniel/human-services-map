@@ -1,0 +1,120 @@
+/* Human Services Web Map — mobile-first, high-contrast, plain-language UI.
+   Audience: people in crisis, often on phones. Big targets, clear text. */
+
+* { box-sizing: border-box; }
+
+:root {
+  --food: #2e7d32;
+  --housing: #ef6c00;
+  --mental: #6a1b9a;
+  --open: #1b7f3b;
+  --closed: #b3261e;
+  --unknown: #5f6368;
+  --ink: #1f1f1f;
+  --paper: #ffffff;
+  --line: #d7d7d7;
+}
+
+html, body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: #fff; padding: 0.5rem 1rem; z-index: 100;
+}
+.skip-link:focus { left: 0; }
+
+header { padding: 0.75rem 1rem 0.25rem; }
+h1 { font-size: 1.25rem; margin: 0; }
+.tagline { margin: 0.15rem 0 0; color: #444; font-size: 0.95rem; }
+
+/* --- controls --- */
+
+.controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); }
+
+.category-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.cat-btn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-size: 1rem; padding: 0.55rem 0.9rem;      /* >=44px touch target */
+  border: 2px solid var(--line); border-radius: 999px;
+  background: #f2f2f2; color: #555; cursor: pointer;
+}
+.cat-btn.is-on { background: #fff; color: var(--ink); border-color: #555; }
+.cat-btn:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+
+.dot { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; }
+.dot-food { background: var(--food); }
+.dot-housing { background: var(--housing); }
+.dot-mental { background: var(--mental); }
+.cat-btn:not(.is-on) .dot { opacity: 0.35; }
+
+.hide-closed {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.6rem; font-size: 1rem;
+}
+.hide-closed input { width: 1.25rem; height: 1.25rem; }
+.fail-open-note { margin: 0.25rem 0 0; font-size: 0.85rem; color: #555; }
+
+/* --- layout: map + list --- */
+
+main { display: flex; flex-direction: column; }
+#mapView { height: 45vh; min-height: 280px; }
+#list { padding: 0.75rem 1rem 2rem; }
+#status { font-weight: 600; }
+
+@media (min-width: 900px) {
+  main { flex-direction: row; height: calc(100vh - 170px); }
+  #mapView { flex: 1.2; height: auto; }
+  #list { flex: 1; overflow-y: auto; }
+}
+
+/* --- cards --- */
+
+.card {
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.75rem;
+  background: #fff;
+}
+.card.cat-food { border-left-color: var(--food); }
+.card.cat-housing { border-left-color: var(--housing); }
+.card.cat-mental_health { border-left-color: var(--mental); }
+.card[tabindex]:hover, .card[tabindex]:focus-visible { box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; }
+.card.is-highlighted { outline: 3px solid #1a73e8; }
+
+.card-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.name { font-size: 1.05rem; margin: 0; flex: 1 1 auto; }
+
+.badge {
+  font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em;
+  padding: 0.15rem 0.6rem; border-radius: 999px; color: #fff; white-space: nowrap;
+}
+.badge-open { background: var(--open); }
+.badge-closed { background: var(--closed); }
+.badge-unknown { background: var(--unknown); }
+
+.category-line { margin: 0.25rem 0; color: #444; font-size: 0.9rem; }
+.address, .desc, .hours { margin: 0.3rem 0; }
+.hours { font-weight: 600; }
+
+.confidential-note {
+  margin: 0.3rem 0; padding: 0.4rem 0.6rem;
+  background: #fdf3e7; border-radius: 6px; font-weight: 600;
+}
+
+.links { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0.45rem 0 0.1rem; }
+.links a { font-size: 1rem; color: #0b57d0; text-decoration: underline; }
+.links a.phone { font-weight: 700; }
+
+.verified { margin: 0.35rem 0 0; font-size: 0.8rem; color: #666; }
+
+footer { padding: 0.75rem 1rem 1.5rem; border-top: 1px solid var(--line); font-size: 0.85rem; color: #555; }
