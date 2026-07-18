@@ -42,6 +42,11 @@
   </header>
 
   <nav class="controls" aria-label="Filter services">
+    <div class="search-box">
+      <label for="searchInput" class="visually-hidden">Search services</label>
+      <input id="searchInput" type="search" autocomplete="off"
+             placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
+    </div>
     <div class="category-buttons" role="group" aria-label="Show categories">
       <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
         <span class="dot dot-food" aria-hidden="true"></span>Food

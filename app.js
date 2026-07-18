@@ -162,6 +162,14 @@ let layerView = null;
 let mapView = null;
 const activeCategories = new Set(["food", "housing", "mental_health"]);
 let hideClosed = false;
+let searchTerms = []; // lowercased words; every word must match somewhere
+
+function matchesSearch(svc) {
+  if (!searchTerms.length) return true;
+  const hay = [svc.name, svc.services_desc, svc.address]
+    .filter(Boolean).join(" ").toLowerCase();
+  return searchTerms.every((t) => hay.includes(t));
+}
 
 /* ---------- rendering ---------- */
 
@@ -169,6 +177,7 @@ function visibleServices() {
   return services.filter((s) => {
     if (!activeCategories.has(s.category)) return false;
     if (hideClosed && s.state === "closed") return false; // "unknown" stays
+    if (!matchesSearch(s)) return false;
     return true;
   });
 }
@@ -272,6 +281,11 @@ document.querySelectorAll(".cat-btn").forEach((btn) => {
 
 document.getElementById("hideClosed").addEventListener("change", (ev) => {
   hideClosed = ev.target.checked;
+  refresh();
+});
+
+document.getElementById("searchInput").addEventListener("input", (ev) => {
+  searchTerms = ev.target.value.toLowerCase().split(/\s+/).filter(Boolean);
   refresh();
 });
 

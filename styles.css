@@ -38,6 +38,19 @@ h1 { font-size: 1.25rem; margin: 0; }
 
 .controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); }
 
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.search-box { margin-bottom: 0.6rem; }
+.search-box input {
+  width: 100%; max-width: 460px;
+  font-size: 1rem; padding: 0.55rem 0.8rem;   /* >=44px touch target */
+  border: 2px solid var(--line); border-radius: 8px;
+}
+.search-box input:focus-visible { outline: 3px solid #1a73e8; outline-offset: 1px; }
+
 .category-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
 .cat-btn {
