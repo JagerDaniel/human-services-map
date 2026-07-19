@@ -29,9 +29,9 @@ const CATEGORY_LABEL = {
   mental_health: "Mental health",
 };
 const CATEGORY_COLOR = {
-  food: "#2e7d32",
-  housing: "#ef6c00",
-  mental_health: "#6a1b9a",
+  food: "#5b7a3a",
+  housing: "#b5652e",
+  mental_health: "#6b4e7a",
 };
 
 /* Map-pin / dot glyphs — built from plain SVG primitives (rect/circle/
@@ -411,7 +411,7 @@ require([
       symbol: {
         type: "simple-fill",
         color: [51,51, 204, 0.1 ],
-        outline: { color: "#5f6368", width: 1.5},
+        outline: { color: "#7a6a56", width: 1.5},
       },
     },
     popupEnabled: false,

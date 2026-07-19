@@ -1,33 +1,34 @@
 /* Human Services Web Map — mobile-first, high-contrast, plain-language UI.
    Audience: people in crisis, often on phones. Big targets, clear text.
 
-   Visual language matched to https://pets-dashboard.pages.dev/ (Daniel's
-   other public dashboard): a cream page, a beige panel surface, a crimson
-   header bar, and a maroon accent for active controls/status pills. Colors
-   below were read directly from that site's computed styles, not eyeballed.
-   --food/--housing/--mental stay as originally chosen (distinct from the
-   reference, which only has two states) — they're what ties a card's left
-   border to its matching map pin color in app.js. */
+   "Warm valley" palette: drawn from Kittitas/Yakima itself (orchard, wheat,
+   sagebrush high desert) rather than a generic warm-neutral formula, and
+   deliberately calmer than the site's original crimson/maroon (which read
+   as a government alert banner, not a community resource finder). Brand
+   color and status color are kept separate on purpose -- --accent no longer
+   doubles as --closed the way the old maroon did, so a page full of closed
+   listings doesn't recolor the whole page's mood. --header-bg/--accent were
+   contrast-checked against white text and against the --sidebar panel
+   (both >=4.5:1, WCAG AA) before landing here. --food/--housing/--mental
+   tie a card's left border to its matching map pin color in app.js. */
 
 * { box-sizing: border-box; }
 
 :root {
-  --food: #2e7d32;
-  --housing: #ef6c00;
-  --mental: #6a1b9a;
-  --open: #0f7a57;      /* reference's FOUND green */
-  --closed: #901e1e;    /* reference's MISSING/accent maroon */
-  --unknown: #5f6368;
+  --food: #5b7a3a;
+  --housing: #b5652e;
+  --mental: #6b4e7a;
+  --open: #3f7d5c;       /* deep teal-sage */
+  --closed: #b5502e;     /* warm rust -- was the same hex as --accent; split apart */
+  --unknown: #8a7b68;
 
-  --bg: #e8e8c8;         /* reference: page background */
-  --sidebar: #f5f5dc;    /* reference: panel/card surface (beige) */
-  --header-bg: #dc143c;  /* reference: header bar (crimson) */
-  --accent: #901e1e;     /* reference: active buttons, links, MISSING pill */
-  --ink: #111111;        /* reference: primary text */
-  --muted: #555555;      /* reference: secondary text */
-  --line: rgba(17, 17, 17, 0.12); /* a light-theme border in the same spirit
-                                     as the reference's mostly-borderless,
-                                     bg-shift-driven separation */
+  --bg: #f1e9d8;          /* warm wheat-sand page background */
+  --sidebar: #fbf6ec;     /* soft warm off-white panel/card surface */
+  --header-bg: #647256;   /* muted sage/olive -- sagebrush, not alarm-red */
+  --accent: #9c5624;      /* baked-clay amber: active buttons, links */
+  --ink: #3a2e22;         /* warm near-black primary text */
+  --muted: #7a6a56;       /* warm taupe secondary text */
+  --line: rgba(58, 46, 34, 0.12); /* warm-toned hairline, derived from --ink */
 }
 
 html, body {
@@ -164,7 +165,7 @@ h1 {
 .cat-btn {
   display: inline-flex; align-items: center; gap: 0.45rem;
   font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0.9rem;  /* >=44px touch target */
-  border: 1.6px solid rgba(144, 30, 30, 0.25); border-radius: 7px;
+  border: 1.6px solid rgba(156, 86, 36, 0.3); border-radius: 7px;
   background: transparent; color: var(--accent); cursor: pointer;
 }
 .cat-btn.is-on { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -319,9 +320,9 @@ main.sheet-expanded .list-content { display: block; }
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
   padding: 0.15rem 0.6rem; border-radius: 10px; white-space: nowrap;
 }
-.badge-open { background: rgba(15, 122, 87, 0.12); color: var(--open); }
-.badge-closed { background: rgba(144, 30, 30, 0.12); color: var(--closed); }
-.badge-unknown { background: rgba(95, 99, 104, 0.12); color: var(--unknown); }
+.badge-open { background: rgba(63, 125, 92, 0.14); color: var(--open); }
+.badge-closed { background: rgba(181, 80, 46, 0.14); color: var(--closed); }
+.badge-unknown { background: rgba(138, 123, 104, 0.16); color: var(--unknown); }
 
 .category-line { margin: 0.25rem 0; color: var(--muted); font-size: 0.9rem; }
 .address, .desc, .hours { margin: 0.3rem 0; }
@@ -329,7 +330,7 @@ main.sheet-expanded .list-content { display: block; }
 
 .confidential-note {
   margin: 0.3rem 0; padding: 0.4rem 0.6rem;
-  background: rgba(144, 30, 30, 0.08);
+  background: rgba(181, 80, 46, 0.08);
   border-left: 3px solid var(--closed);
   border-radius: 6px; font-weight: 600;
 }
