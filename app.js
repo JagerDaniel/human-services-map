@@ -19,7 +19,7 @@ const CONFIG = {
   // mailing here with the service name + service_id prefilled in the subject.
   correctionEmail: "correctionscw@gmail.com",
   center: [-120.6, 46.85], // between Ellensburg and Yakima
-  zoom: 9, // tighter than the full two-county extent -- less empty space around the population corridor
+  zoom: 10, // tighter than the full two-county extent -- less empty space around the population corridor
   refreshSeconds: 60, // re-evaluate open/closed badges this often
 };
 
@@ -453,23 +453,6 @@ require([
       clusterMinSize: 28, // was 26
       clusterMaxSize: 52, // was 54
       symbol: { type: "picture-marker", url: pinDataUri(cat, 44), width: "44px", height: "44px" },
-      labelingInfo: [{
-        labelExpressionInfo: {
-          expression: "$feature.cluster_count"
-        },
-        deconflictionStrategy: "none",
-        labelPlacement: "center-center",
-        symbol: {
-          type: "text",
-          color: "white",
-          font: {
-            size: "12px",
-            weight: "bold",
-          },
-          haloSize: 1,
-          haloColor: "black"
-        }
-      }]
     };
     categoryLayers[cat] = catLayer;
   });
