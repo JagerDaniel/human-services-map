@@ -343,15 +343,41 @@ require([
   // authoritative source the wrapper's geocoder already trusts for the
   // geofence. Outline only (no fill) so it never obscures the basemap or
   // service points; drawn first so it sits below everything else.
+  //
+  // "Drop shadow" is faked with two stacked copies of the same query: a
+  // wide, soft, semi-transparent solid line UNDER a crisp thin dashed line.
+  // (Real CSS-style drop-shadow isn't a thing at the vector-symbol level;
+  // ArcGIS CIM symbols can approximate one, but that's untested territory
+  // in this pinned SDK — two plain simple-fill/outline layers is the same
+  // technique already proven reliable here, just doubled.)
+  const countyUrl = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1";
+  const countyWhere = "STATE='53' AND (BASENAME='Kittitas' OR BASENAME='Yakima')";
+  const countyScale = { minScale: 0, maxScale: 0 }; // override TIGERweb's own scale range (see below)
+
+  const countyShadowLayer = new FeatureLayer({
+    url: countyUrl,
+    definitionExpression: countyWhere,
+    outFields: ["BASENAME"],
+    ...countyScale,
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-fill",
+        color: [0, 0, 0, 0],
+        outline: { color: [0, 0, 0, 0.3], width: 5, style: "solid" },
+      },
+    },
+    popupEnabled: false,
+  });
+
   const countyLayer = new FeatureLayer({
-    url: "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1",
-    definitionExpression: "STATE='53' AND (BASENAME='Kittitas' OR BASENAME='Yakima')",
+    url: countyUrl,
+    definitionExpression: countyWhere,
     outFields: ["BASENAME"],
     // TIGERweb ships this sublayer with its own minScale/maxScale (tuned for
     // its reference-map context) that suspends rendering at our normal
     // browsing zoom. 0 = no restriction, so it's always visible here.
-    minScale: 0,
-    maxScale: 0,
+    ...countyScale,
     renderer: {
       type: "simple",
       symbol: {
@@ -377,7 +403,13 @@ require([
     popupEnabled: false, // detail lives in the injection-safe cards
   });
 
-  const map = new Map({ basemap: "streets-navigation-vector", layers: [countyLayer, layer] });
+  // gray-vector: a muted, low-contrast basemap so the colored/semi-
+  // transparent service pins (the actual point of the map) are the visual
+  // focus instead of competing with a busy streets basemap's own colors.
+  const map = new Map({
+    basemap: "gray-vector",
+    layers: [countyShadowLayer, countyLayer, layer],
+  });
   mapView = new MapView({
     container: "mapView", map,
     center: CONFIG.center, zoom: CONFIG.zoom,
