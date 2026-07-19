@@ -41,10 +41,15 @@ const CATEGORY_COLOR = {
  * the category color, inside a circle. Each entry is a function of the pin
  * color so a glyph can "cut" a same-color notch (see the apple's stem dimple)
  * that always matches its own pin, even if CATEGORY_COLOR changes later. */
+// Pins are drawn at 70% opacity (30% transparent) so overlapping/clustered
+// points blend instead of one fully hiding another. Applied to the colored
+// fill only — the white glyph and outline stay fully opaque for legibility.
+const PIN_FILL_OPACITY = 0.7;
+
 const CATEGORY_ICON_MARKUP = {
   food: (color) =>
       '<circle cx="12" cy="13.5" r="6" fill="white"/>'          // apple body
-    + `<circle cx="12" cy="8" r="2.3" fill="${color}"/>`        // top notch (cut to match the pin)
+    + `<circle cx="12" cy="8" r="2.3" fill="${color}" fill-opacity="${PIN_FILL_OPACITY}"/>`  // top notch (cut to match the pin)
     + '<rect x="11.3" y="4" width="1.4" height="4.5" rx="0.7" fill="white"/>'  // stem
     + '<ellipse cx="14.5" cy="5.3" rx="2.1" ry="1.1" fill="white" transform="rotate(35 14.5 5.3)"/>', // leaf
   housing: () =>
@@ -59,7 +64,7 @@ function pinSvgMarkup(category, diameter) {
   const r = 10.5;
   const glyph = CATEGORY_ICON_MARKUP[category] ? CATEGORY_ICON_MARKUP[category](color) : "";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${diameter}" height="${diameter}" viewBox="0 0 24 24">`
-    + `<circle cx="12" cy="12" r="${r}" fill="${color}" stroke="white" stroke-width="1.5"/>`
+    + `<circle cx="12" cy="12" r="${r}" fill="${color}" fill-opacity="${PIN_FILL_OPACITY}" stroke="white" stroke-width="1.5"/>`
     + glyph
     + `</svg>`;
 }

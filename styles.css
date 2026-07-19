@@ -17,6 +17,7 @@
 
 html, body {
   margin: 0;
+  height: 100%; /* lets #list become its own scroll pane — see "layout" below */
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -53,7 +54,7 @@ h1 { font-size: 1.25rem; margin: 0; }
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-.search-box { margin-bottom: 0.6rem; }
+.search-box { margin-bottom: 0.45rem; }
 .search-box input {
   width: 100%; max-width: 460px;
   font-size: 1rem; padding: 0.55rem 0.8rem;   /* >=44px touch target */
@@ -82,47 +83,55 @@ h1 { font-size: 1.25rem; margin: 0; }
 
 .hide-closed {
   display: flex; align-items: center; gap: 0.5rem;
-  margin-top: 0.6rem; font-size: 1rem;
+  margin-top: 0.4rem; font-size: 1rem;
 }
 .hide-closed input { width: 1.25rem; height: 1.25rem; }
 .fail-open-note { margin: 0.25rem 0 0; font-size: 0.85rem; color: #555; }
 
 /* --- layout: map + controls + list ---
-   Mobile: stacked in DOM order (map, controls, list) via plain flex-column.
-   Desktop: a grid puts controls directly above the list in a sidebar column,
-   freeing the map to span the full column height instead of sharing a
-   full-width control bar with the list. */
+   The whole page is pinned to the viewport (html/body height:100%, body a
+   flex column); header/footer take their natural height and #list is the
+   ONLY element that scrolls. This matters on touch devices: a map captures
+   drag gestures for panning, so if reaching the cards required a page-level
+   swipe that could start over the map, that swipe would pan the map instead
+   of scrolling. Giving #list its own bounded, always-visible scroll pane
+   below the map means you never need to gesture over the map to reach a
+   card — touching the list scrolls the list; touching the map pans the map
+   (which is the map's own expected behavior). Same technique on both
+   breakpoints; only the grid arrangement changes. */
 
-/* Explicit grid areas at both breakpoints (not DOM order) so "controls"
-   can sit before the map on mobile, but beside the list on desktop. */
+body { display: flex; flex-direction: column; }
+header { flex: 0 0 auto; }
+
 main {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-areas: "controls" "map" "list";
-  grid-template-rows: auto 45vh 1fr;
+  grid-template-rows: auto minmax(170px, 28vh) 1fr;
 }
-#mapView { grid-area: map; min-height: 280px; }
+#mapView { grid-area: map; min-height: 0; }
 .controls { grid-area: controls; }
-#list { grid-area: list; padding: 0.75rem 1rem 2rem; }
+#list {
+  grid-area: list;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  padding: 0.75rem 1rem 2rem;
+}
 #status { font-weight: 600; }
 
 @media (min-width: 900px) {
-  html, body { height: 100%; }
-  body { display: flex; flex-direction: column; }
-  header, footer { flex: 0 0 auto; }
-
   main {
-    flex: 1 1 auto;
-    min-height: 0;
     grid-template-columns: 1.6fr 1fr;
     grid-template-areas: "map controls" "map list";
     grid-template-rows: auto 1fr;
   }
-  #mapView { min-height: 0; }
   .controls {
     border-left: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
-  #list { overflow-y: auto; border-left: 1px solid var(--line); }
+  #list { border-left: 1px solid var(--line); }
 }
 
 /* --- cards --- */

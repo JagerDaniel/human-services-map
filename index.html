@@ -73,13 +73,14 @@
     <section id="list" aria-label="List of services">
       <p id="status" role="status">Loading services…</p>
       <div id="cards"></div>
+      <!-- Scrolls with the list (not pinned) — it's supplementary, the
+           on-page disclaimer already carries the safety-critical message. -->
+      <footer>
+        <p>Hours shown in Pacific time. Information may change — please call ahead.
+           <span id="correctionSlot"></span></p>
+      </footer>
     </section>
   </main>
-
-  <footer>
-    <p>Hours shown in Pacific time. Information may change — please call ahead.
-       <span id="correctionSlot"></span></p>
-  </footer>
 
   <script src="app.js"></script>
 </body>
