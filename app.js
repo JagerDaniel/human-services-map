@@ -41,10 +41,10 @@ const CATEGORY_COLOR = {
  * the category color, inside a circle. Each entry is a function of the pin
  * color so a glyph can "cut" a same-color notch (see the apple's stem dimple)
  * that always matches its own pin, even if CATEGORY_COLOR changes later. */
-// Pins are drawn at 70% opacity (30% transparent) so overlapping/clustered
-// points blend instead of one fully hiding another. Applied to the colored
-// fill only — the white glyph and outline stay fully opaque for legibility.
-const PIN_FILL_OPACITY = 0.7;
+// Pins are drawn at 50% opacity so overlapping/clustered points blend
+// instead of one fully hiding another. Applied to the colored fill only —
+// the white glyph and outline stay fully opaque for legibility.
+const PIN_FILL_OPACITY = 0.5;
 
 const CATEGORY_ICON_MARKUP = {
   food: (color) =>
