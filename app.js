@@ -367,21 +367,7 @@ require([
   const countyWhere = "STATE='53' AND (BASENAME='Kittitas' OR BASENAME='Yakima')";
   const countyScale = { minScale: 0, maxScale: 0 }; // override TIGERweb's own scale range (see below)
 
-  const countyShadowLayer = new FeatureLayer({
-    url: countyUrl,
-    definitionExpression: countyWhere,
-    outFields: ["BASENAME"],
-    ...countyScale,
-    renderer: {
-      type: "simple",
-      symbol: {
-        type: "simple-fill",
-        color: [0, 0, 0, 0],
-        outline: { color: [0, 0, 0, 0.3], width: 5, style: "solid" },
-      },
-    },
-    popupEnabled: false,
-  });
+
 
   const countyLayer = new FeatureLayer({
     url: countyUrl,
@@ -395,12 +381,19 @@ require([
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [0, 0, 0, 0],
-        outline: { color: "#5f6368", width: 1.5, style: "short-dash" },
+        color: [51,51, 204, 0.1 ],
+        outline: { color: "#5f6368", width: 1.5},
       },
     },
     popupEnabled: false,
   });
+  // CSS drop-shadow() arguments are SPACE-separated, not comma-separated —
+  // commas here silently no-op the whole filter (verified live: neither the
+  // original nor a comma-fixed-but-still-small value produced any visible
+  // shadow). Even the space-fixed version needs a real blur/offset to read
+  // reliably across the zoom range people actually browse at — 6px/6px/8px
+  // was visible at zoom 14 but borderline at zoom 13, so sized up further.
+  countyLayer.effect = "drop-shadow(4px 4px 12px rgba(0, 0, 0, 0.7)) brightness(1.1)";
 
   const layer = new FeatureLayer({
     url: CONFIG.layerUrl,
@@ -415,13 +408,32 @@ require([
     },
     popupEnabled: false, // detail lives in the injection-safe cards
   });
+  layer.featureReduction = {
+    type: "cluster",
+    labelingInfo: [{
+    labelExpressionInfo: {
+      expression: "$feature.cluster_count"
+    },
+    deconflictionStrategy: "none",
+    labelPlacement: "center-center",
+    symbol: {
+      type: "text",
+      color: "white",
+      font: {
+        size: "12px"
+      },
+      haloSize: 1,
+      haloColor: "black"
+    }
+  }]
+  };
 
   // gray-vector: a muted, low-contrast basemap so the colored/semi-
   // transparent service pins (the actual point of the map) are the visual
   // focus instead of competing with a busy streets basemap's own colors.
   const map = new Map({
     basemap: "gray-vector",
-    layers: [countyShadowLayer, countyLayer, layer],
+    layers: [countyLayer, layer],
   });
   mapView = new MapView({
     container: "mapView", map,

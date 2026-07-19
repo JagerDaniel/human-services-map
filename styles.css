@@ -59,7 +59,7 @@ header {
 }
 h1 {
   font-family: Calibri, Candara, Segoe, sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   margin: 0;
@@ -70,27 +70,45 @@ h1 {
 
 @media (min-width: 900px) {
   header { padding: 0.9rem 1rem; }
-  h1 { font-size: 1.75rem; }
+  h1 { font-size: 2.1rem; }
   .tagline { margin: 0.3rem 0 0; font-size: 0.95rem; }
 }
 
-/* A centered "flag", not a full-width bar — text-align + auto margins on a
-   constrained max-width. */
+/* Two disclaimer variants sharing one base look; only one is ever visible at
+   a time. Mobile shows the short one-line "flag" (fits the narrowest phone
+   without wrapping); desktop has room for the longer, friendlier version
+   with a bold lead-in, so it's swapped in there instead. */
 .disclaimer {
   margin: 0.5rem auto 0;
-  max-width: 480px;
-  padding: 0.4rem 0.7rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.4rem 0.9rem;
   text-align: center;
   background: var(--sidebar);
   border-left: 4px solid var(--accent);
   border-radius: 4px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--ink);
 }
-.disclaimer strong { display: block; margin-bottom: 0.1rem; color: var(--accent); }
+
+/* Short flag (mobile default): one line, never wraps — width:fit-content
+   (not a fixed max-width) so the box hugs exactly however wide the text is
+   and stays centered via auto margins. */
+.disclaimer-short { white-space: nowrap; }
+.disclaimer-long { display: none; }
 
 @media (min-width: 900px) {
-  .disclaimer { margin-top: 0.6rem; padding: 0.5rem 0.7rem; font-size: 0.9rem; }
+  .disclaimer-short { display: none; }
+  .disclaimer-long {
+    display: block;
+    white-space: normal;
+    width: auto;
+    max-width: none;
+    margin: 0.6rem 0 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  .disclaimer-long strong { color: var(--accent); }
 }
 
 /* --- controls --- */
