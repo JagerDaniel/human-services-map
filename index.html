@@ -37,7 +37,7 @@
   <a class="skip-link" href="#list">Skip to the list of services</a>
 
   <header>
-    <h1>Find help in Kittitas &amp; Yakima counties</h1>
+    <h1>Find Help in Kittitas and Yakima Counties</h1>
     <p class="tagline">Free food, housing, and mental-health services. Call ahead when you can.</p>
     <p class="disclaimer">
       <strong>Please double-check before you go.</strong> Call the number listed
@@ -71,17 +71,27 @@
       <p class="fail-open-note">Places with unknown hours are always shown.</p>
     </nav>
     <section id="list" aria-label="List of services">
-      <!-- Decorative "grab handle" — the mobile bottom-sheet affordance
-           (hidden on desktop, where #list is a flat sidebar). -->
-      <div class="sheet-handle" aria-hidden="true"></div>
-      <p id="status" role="status">Loading services…</p>
-      <div id="cards"></div>
-      <!-- Scrolls with the list (not pinned) — it's supplementary, the
-           on-page disclaimer already carries the safety-critical message. -->
-      <footer>
-        <p>Hours shown in Pacific time. Information may change — please call ahead.
-           <span id="correctionSlot"></span></p>
-      </footer>
+      <!-- Mobile bottom-sheet toggle: collapsed by default so the map gets
+           most of the screen; tapping this reveals the actual list. On
+           desktop this is hidden and .list-content is always shown (see
+           the 900px breakpoint below) — there's no collapse there. -->
+      <button type="button" id="sheetToggle" class="sheet-handle" aria-expanded="false" aria-controls="listContent">
+        <span class="handle-bar" aria-hidden="true"></span>
+        <span class="sheet-toggle-text">
+          <strong>Location Details</strong>
+          <span class="sheet-toggle-hint">Expand for more information</span>
+        </span>
+      </button>
+      <div id="listContent" class="list-content">
+        <p id="status" role="status">Loading services…</p>
+        <div id="cards"></div>
+        <!-- Scrolls with the list (not pinned) — it's supplementary, the
+             on-page disclaimer already carries the safety-critical message. -->
+        <footer>
+          <p>Hours shown in Pacific time. Information may change — please call ahead.
+             <span id="correctionSlot"></span></p>
+        </footer>
+      </div>
     </section>
   </main>
 

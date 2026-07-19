@@ -307,6 +307,19 @@ function refresh() {
 
 /* ---------- wiring ---------- */
 
+// Mobile bottom-sheet toggle: collapsed by default (map gets most of the
+// screen), tap to reveal the actual list. Inert on desktop — the CSS at the
+// 900px breakpoint forces .list-content visible and hides this button
+// regardless of the class, so toggling it there has no visual effect.
+const sheetToggle = document.getElementById("sheetToggle");
+const sheetHint = sheetToggle.querySelector(".sheet-toggle-hint");
+sheetToggle.addEventListener("click", () => {
+  const expanded = sheetToggle.getAttribute("aria-expanded") === "true";
+  sheetToggle.setAttribute("aria-expanded", String(!expanded));
+  document.querySelector("main").classList.toggle("sheet-expanded", !expanded);
+  sheetHint.textContent = expanded ? "Expand for more information" : "Tap to collapse";
+});
+
 // Filter-button dots use the exact same glyphs as the map pins, so the
 // legend and the map teach each other.
 document.querySelectorAll(".dot[data-category]").forEach((dot) => {

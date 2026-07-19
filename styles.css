@@ -48,37 +48,50 @@ html, body {
 }
 .skip-link:focus { left: 0; }
 
+/* Mobile header is deliberately condensed (tighter padding, smaller type) —
+   the bottom-sheet toggle below does most of the work of giving the map
+   room, but a shorter header helps too. Desktop restores full size. */
 header {
-  padding: 0.9rem 1rem;
-  text-align: center;
+  padding: 0.5rem 0.9rem;
+  text-align: center; /* the default for header children (tagline) */
   background: var(--header-bg);
   color: #fff;
 }
 h1 {
   font-family: Calibri, Candara, Segoe, sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   margin: 0;
   color: #fff;
+  text-align: left; /* overrides header's centering — title stays left */
 }
-.tagline { margin: 0.3rem 0 0; color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; }
+.tagline { margin: 0.2rem 0 0; color: rgba(255, 255, 255, 0.85); font-size: 0.8rem; }
 
 @media (min-width: 900px) {
+  header { padding: 0.9rem 1rem; }
   h1 { font-size: 1.75rem; }
+  .tagline { margin: 0.3rem 0 0; font-size: 0.95rem; }
 }
 
+/* A centered "flag", not a full-width bar — text-align + auto margins on a
+   constrained max-width. */
 .disclaimer {
-  margin: 0.6rem 1rem 0;
-  padding: 0.5rem 0.7rem;
-  text-align: left;
+  margin: 0.5rem auto 0;
+  max-width: 480px;
+  padding: 0.4rem 0.7rem;
+  text-align: center;
   background: var(--sidebar);
   border-left: 4px solid var(--accent);
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--ink);
 }
 .disclaimer strong { display: block; margin-bottom: 0.1rem; color: var(--accent); }
+
+@media (min-width: 900px) {
+  .disclaimer { margin-top: 0.6rem; padding: 0.5rem 0.7rem; font-size: 0.9rem; }
+}
 
 /* --- controls --- */
 
@@ -138,9 +151,14 @@ h1 {
    of scrolling. Giving #list its own bounded, always-visible scroll pane
    below the map means you never need to gesture over the map to reach a
    card — touching the list scrolls the list; touching the map pans the map
-   (which is the map's own expected behavior). Same technique on both
-   breakpoints; only the grid arrangement (and, on mobile, the "bottom
-   sheet" framing of #list) changes. */
+   (which is the map's own expected behavior).
+
+   Mobile ALSO starts #list COLLAPSED — .list-content is hidden and the map
+   fills nearly the whole remaining height, so the map is the dominant
+   element by default. Tapping #sheetToggle ("Location Details — Expand for
+   more information") reveals the real list; main.sheet-expanded is the
+   toggled state (set by app.js). Desktop ignores this entirely — the list
+   is always fully visible there (see the 900px breakpoint). */
 
 body { display: flex; flex-direction: column; }
 header { flex: 0 0 auto; }
@@ -150,7 +168,10 @@ main {
   min-height: 0;
   display: grid;
   grid-template-areas: "controls" "map" "list";
-  grid-template-rows: auto minmax(170px, 28vh) 1fr;
+  grid-template-rows: auto 1fr auto; /* map gets the leftover space; list = just the toggle */
+}
+main.sheet-expanded {
+  grid-template-rows: auto minmax(160px, 26vh) 1fr; /* list grows back to a real scroll pane */
 }
 #mapView { grid-area: map; min-height: 0; background: var(--bg); }
 .controls { grid-area: controls; }
@@ -158,30 +179,39 @@ main {
 /* Mobile: #list reads as a dedicated panel "docked" to the bottom of the
    screen — the same idea as the desktop sidebar, just anchored to the
    bottom edge instead of a side edge. Rounded top corners + an upward
-   shadow + a decorative grab handle give it that "pinned sheet" identity,
-   using the beige panel surface so it visibly sits above the map. */
+   shadow give it that "pinned sheet" identity, using the beige panel
+   surface so it visibly sits above the map. */
 #list {
   grid-area: list;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
-  padding: 0.75rem 1rem 2rem;
   background: var(--sidebar);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.18);
   position: relative;
 }
+
 .sheet-handle {
-  position: sticky; top: 0;
-  display: flex; justify-content: center;
-  padding: 0.5rem 0 0.4rem;
-  background: var(--sidebar); /* stays opaque as cards scroll beneath it */
+  /* A real <button> now (was decorative) — reset default button chrome. */
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; border: none; cursor: pointer;
+  background: var(--sidebar);
+  padding: 0.5rem 0 0.6rem;
+  font: inherit; color: var(--ink);
 }
-.sheet-handle::after {
-  content: ""; width: 36px; height: 4px; border-radius: 999px;
-  background: var(--line);
+.handle-bar {
+  width: 36px; height: 4px; border-radius: 999px;
+  background: var(--line); margin-bottom: 0.4rem;
 }
+.sheet-toggle-text { display: flex; align-items: baseline; gap: 0.4rem; }
+.sheet-toggle-text strong { font-size: 0.95rem; }
+.sheet-toggle-hint { font-size: 0.8rem; color: var(--muted); }
+.sheet-handle:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+.list-content { display: none; padding: 0 1rem 2rem; }
+main.sheet-expanded .list-content { display: block; }
 
 #status { font-weight: 600; }
 
@@ -195,8 +225,8 @@ main {
     border-left: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
-  /* Desktop: a flat sidebar column, not a "docked sheet" — no rounded
-     corners/shadow/handle (those are the mobile bottom-sheet affordance). */
+  /* Desktop: a flat sidebar column, always fully expanded — no collapse,
+     no rounded corners/shadow/toggle (those are the mobile-only affordance). */
   #list {
     border-left: 1px solid var(--line);
     border-top-left-radius: 0;
@@ -204,6 +234,7 @@ main {
     box-shadow: none;
   }
   .sheet-handle { display: none; }
+  .list-content { display: block !important; padding: 0.75rem 1rem 2rem; }
 }
 
 /* --- cards --- */
