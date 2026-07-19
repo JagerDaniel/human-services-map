@@ -19,7 +19,7 @@ const CONFIG = {
   // mailing here with the service name + service_id prefilled in the subject.
   correctionEmail: "correctionscw@gmail.com",
   center: [-120.6, 46.85], // between Ellensburg and Yakima
-  zoom: 10, // tighter than the full two-county extent -- less empty space around the population corridor
+  zoom: 8, // full two-county extent
   refreshSeconds: 60, // re-evaluate open/closed badges this often
 };
 
