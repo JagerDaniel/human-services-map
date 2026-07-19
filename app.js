@@ -451,7 +451,7 @@ require([
     catLayer.featureReduction = {
       type: "cluster",
       clusterMinSize: 28, // was 26
-      clusterMaxSize: 52, // was 54
+      clusterMaxSize: 44, // was 52
       symbol: { type: "picture-marker", url: pinDataUri(cat, 44), width: "44px", height: "44px" },
     };
     categoryLayers[cat] = catLayer;
