@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Food, Housing &amp; Mental Health Help — Kittitas &amp; Yakima Counties</title>
   <meta name="description"
         content="Free map of food, housing, and mental-health services in Kittitas and Yakima counties, Washington." />
@@ -38,7 +38,7 @@
 
   <header>
     <h1>Find Help in Kittitas and Yakima Counties</h1>
-    <p class="tagline">Free food, housing, and mental-health services. Call ahead when you can.</p>
+    <p class="tagline">Free food, housing, and mental-health services in Kittitas and Yakima counties.</p>
     <p class="disclaimer disclaimer-short">Please call ahead to confirm details.</p>
     <p class="disclaimer disclaimer-long">
       <strong>Please double-check before you go.</strong> Call the number listed
@@ -49,27 +49,44 @@
   <main>
     <div id="mapView" aria-label="Map of services"></div>
     <nav class="controls" aria-label="Filter services">
-      <div class="search-box">
-        <label for="searchInput" class="visually-hidden">Search services</label>
-        <input id="searchInput" type="search" autocomplete="off"
-               placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
+      <!-- Mobile-only collapsible drawer (same collapsed-by-default idea as
+           the bottom sheet): keeps the intro stack short on load so the map
+           is visible without scrolling. Desktop always shows this expanded
+           (see the 900px breakpoint) — there's no collapse there. -->
+      <button type="button" id="controlsToggle" class="controls-toggle" aria-expanded="false" aria-controls="controlsContent">
+        <span>Search &amp; filters</span>
+        <span class="controls-toggle-hint">Tap to expand</span>
+      </button>
+      <div id="controlsContent" class="controls-content">
+        <div class="search-box">
+          <label for="searchInput" class="visually-hidden">Search services</label>
+          <input id="searchInput" type="search" autocomplete="off"
+                 placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
+        </div>
+        <div class="sort-box">
+          <label for="sortSelect">Sort</label>
+          <select id="sortSelect">
+            <option value="open" selected>Open first</option>
+            <option value="alpha">Alphabetical</option>
+          </select>
+        </div>
+        <div class="category-buttons" role="group" aria-label="Show categories">
+          <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
+            <span class="dot" data-category="food" aria-hidden="true"></span>Food
+          </button>
+          <button type="button" class="cat-btn is-on" data-category="housing" aria-pressed="true">
+            <span class="dot" data-category="housing" aria-hidden="true"></span>Housing
+          </button>
+          <button type="button" class="cat-btn is-on" data-category="mental_health" aria-pressed="true">
+            <span class="dot" data-category="mental_health" aria-hidden="true"></span>Mental health
+          </button>
+        </div>
+        <label class="hide-closed">
+          <input type="checkbox" id="hideClosed" />
+          Hide places closed right now
+        </label>
+        <p class="fail-open-note">Places with unknown hours are always shown.</p>
       </div>
-      <div class="category-buttons" role="group" aria-label="Show categories">
-        <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
-          <span class="dot" data-category="food" aria-hidden="true"></span>Food
-        </button>
-        <button type="button" class="cat-btn is-on" data-category="housing" aria-pressed="true">
-          <span class="dot" data-category="housing" aria-hidden="true"></span>Housing
-        </button>
-        <button type="button" class="cat-btn is-on" data-category="mental_health" aria-pressed="true">
-          <span class="dot" data-category="mental_health" aria-hidden="true"></span>Mental health
-        </button>
-      </div>
-      <label class="hide-closed">
-        <input type="checkbox" id="hideClosed" />
-        Hide places closed right now
-      </label>
-      <p class="fail-open-note">Places with unknown hours are always shown.</p>
     </nav>
     <section id="list" aria-label="List of services">
       <!-- Mobile bottom-sheet toggle: collapsed by default so the map gets
@@ -80,7 +97,7 @@
         <span class="handle-bar" aria-hidden="true"></span>
         <span class="sheet-toggle-text">
           <strong>Location Details</strong>
-          <span class="sheet-toggle-hint">Expand for more information</span>
+          <span class="sheet-toggle-hint">Address, hours &amp; phone</span>
         </span>
       </button>
       <div id="listContent" class="list-content">
@@ -89,8 +106,7 @@
         <!-- Scrolls with the list (not pinned) — it's supplementary, the
              on-page disclaimer already carries the safety-critical message. -->
         <footer>
-          <p>Hours shown in Pacific time. Information may change — please call ahead.
-             <span id="correctionSlot"></span></p>
+          <p>Hours shown in Pacific time. <span id="correctionSlot"></span></p>
         </footer>
       </div>
     </section>

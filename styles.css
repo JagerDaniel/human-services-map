@@ -111,9 +111,26 @@ h1 {
   .disclaimer-long strong { color: var(--accent); }
 }
 
-/* --- controls --- */
+/* --- controls ---
+   Mobile: collapsed by default behind a one-line toggle (mirrors the bottom
+   sheet's mechanic) so the intro stack — header, this toggle, nothing else —
+   stays short enough that the map is visible without scrolling on load.
+   Desktop always shows the full content (see the 900px breakpoint). */
 
-.controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); background: var(--sidebar); }
+.controls { border-bottom: 1px solid var(--line); background: var(--sidebar); }
+
+.controls-toggle {
+  display: flex; justify-content: space-between; align-items: baseline;
+  width: 100%; border: none; cursor: pointer;
+  background: var(--sidebar);
+  padding: 0.7rem 1rem;
+  font: inherit; font-weight: 600; color: var(--ink);
+}
+.controls-toggle-hint { font-weight: 400; font-size: 0.85rem; color: var(--muted); }
+.controls-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+.controls-content { display: none; padding: 0.1rem 1rem 0.6rem; }
+.controls.expanded .controls-content { display: block; }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -130,6 +147,14 @@ h1 {
 }
 .search-box input::placeholder { color: var(--muted); }
 .search-box input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+.sort-box { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; font-size: 0.9rem; }
+.sort-box select {
+  font-size: 0.95rem; padding: 0.35rem 0.6rem;
+  background: #fff; color: var(--ink);
+  border: 1.6px solid var(--line); border-radius: 7px;
+}
+.sort-box select:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
 .category-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
@@ -192,6 +217,9 @@ main.sheet-expanded {
   grid-template-rows: auto minmax(160px, 26vh) 1fr; /* list grows back to a real scroll pane */
 }
 #mapView { grid-area: map; min-height: 0; background: var(--bg); }
+/* ArcGIS's built-in +/- zoom widget defaults flush to the view's top-left
+   corner, cramped against the browser chrome above it. */
+#mapView .esri-ui-top-left { top: 0.6rem; left: 0.6rem; }
 .controls { grid-area: controls; }
 
 /* Mobile: #list reads as a dedicated panel "docked" to the bottom of the
@@ -212,11 +240,13 @@ main.sheet-expanded {
 }
 
 .sheet-handle {
-  /* A real <button> now (was decorative) — reset default button chrome. */
+  /* A real <button> now (was decorative) — reset default button chrome.
+     This is the part visible by default (collapsed), so it's what needs the
+     safe-area clearance from a phone's bottom chrome/home indicator. */
   display: flex; flex-direction: column; align-items: center;
   width: 100%; border: none; cursor: pointer;
   background: var(--sidebar);
-  padding: 0.5rem 0 0.6rem;
+  padding: 0.5rem 0 calc(0.6rem + env(safe-area-inset-bottom));
   font: inherit; color: var(--ink);
 }
 .handle-bar {
@@ -228,7 +258,10 @@ main.sheet-expanded {
 .sheet-toggle-hint { font-size: 0.8rem; color: var(--muted); }
 .sheet-handle:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 
-.list-content { display: none; padding: 0 1rem 2rem; }
+.list-content {
+  display: none;
+  padding: 0 1rem calc(2rem + env(safe-area-inset-bottom));
+}
 main.sheet-expanded .list-content { display: block; }
 
 #status { font-weight: 600; }
@@ -243,6 +276,8 @@ main.sheet-expanded .list-content { display: block; }
     border-left: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
+  .controls-toggle { display: none; }
+  .controls-content { display: block !important; padding: 0.75rem 1rem; }
   /* Desktop: a flat sidebar column, always fully expanded — no collapse,
      no rounded corners/shadow/toggle (those are the mobile-only affordance). */
   #list {

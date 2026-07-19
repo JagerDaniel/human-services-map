@@ -19,7 +19,7 @@ const CONFIG = {
   // mailing here with the service name + service_id prefilled in the subject.
   correctionEmail: "correctionscw@gmail.com",
   center: [-120.6, 46.85], // between Ellensburg and Yakima
-  zoom: 8,
+  zoom: 9, // tighter than the full two-county extent -- less empty space around the population corridor
   refreshSeconds: 60, // re-evaluate open/closed badges this often
 };
 
@@ -202,6 +202,7 @@ let mapView = null;
 const activeCategories = new Set(["food", "housing", "mental_health"]);
 let hideClosed = false;
 let searchTerms = []; // lowercased words; every word must match somewhere
+let sortMode = "open"; // "open" (open now, then unknown, then closed) | "alpha"
 
 function matchesSearch(svc) {
   if (!searchTerms.length) return true;
@@ -226,15 +227,17 @@ const STATE_RANK = { open: 0, unknown: 1, closed: 2 };
 function renderCards() {
   const wrap = document.getElementById("cards");
   wrap.replaceChildren();
-  // Open first, then unknown, then closed; alphabetical within each group.
+  // "open" mode: open first, then unknown, then closed; alphabetical within
+  // each group. "alpha" mode: pure A-Z, ignoring open/closed state.
   const visible = visibleServices().sort((a, b) =>
-    (STATE_RANK[a.state] - STATE_RANK[b.state]) ||
+    (sortMode === "alpha" ? 0 : STATE_RANK[a.state] - STATE_RANK[b.state]) ||
     String(a.name).localeCompare(String(b.name)));
 
   const status = document.getElementById("status");
   status.textContent = visible.length
     ? `${visible.length} service${visible.length === 1 ? "" : "s"} shown`
-    : "No services match the current filters.";
+    : "No services match your filters. Try turning on more categories, " +
+      "clearing the search box, or unchecking “Hide places closed right now.”";
 
   for (const svc of visible) {
     const card = el("article", "card cat-" + svc.category);
@@ -261,7 +264,11 @@ function renderCards() {
     }
 
     if (svc.services_desc) card.appendChild(el("p", "desc", svc.services_desc));
-    card.appendChild(el("p", "hours", humanHours(svc.hours_osm)));
+    // 24/7 already reads "Open now" from the badge above; a second line
+    // saying "Open 24 hours, every day" is a redundant restatement.
+    if (String(svc.hours_osm || "").trim() !== "24/7") {
+      card.appendChild(el("p", "hours", humanHours(svc.hours_osm)));
+    }
 
     const links = el("p", "links");
     if (svc.phone) { const t = telLink(svc.phone); if (t) links.appendChild(t); }
@@ -317,7 +324,20 @@ sheetToggle.addEventListener("click", () => {
   const expanded = sheetToggle.getAttribute("aria-expanded") === "true";
   sheetToggle.setAttribute("aria-expanded", String(!expanded));
   document.querySelector("main").classList.toggle("sheet-expanded", !expanded);
-  sheetHint.textContent = expanded ? "Expand for more information" : "Tap to collapse";
+  sheetHint.textContent = expanded ? "Address, hours & phone" : "Tap to collapse";
+});
+
+// Mobile-only search/filters drawer — same collapsed-by-default idea as the
+// bottom sheet above, so the intro stack stays short and the map is visible
+// without scrolling on load. Inert on desktop (900px breakpoint forces it
+// open and hides this button regardless of the class).
+const controlsToggle = document.getElementById("controlsToggle");
+const controlsHint = controlsToggle.querySelector(".controls-toggle-hint");
+controlsToggle.addEventListener("click", () => {
+  const expanded = controlsToggle.getAttribute("aria-expanded") === "true";
+  controlsToggle.setAttribute("aria-expanded", String(!expanded));
+  controlsToggle.closest(".controls").classList.toggle("expanded", !expanded);
+  controlsHint.textContent = expanded ? "Tap to expand" : "Tap to collapse";
 });
 
 // Filter-button dots use the exact same glyphs as the map pins, so the
@@ -345,6 +365,11 @@ document.getElementById("hideClosed").addEventListener("change", (ev) => {
 document.getElementById("searchInput").addEventListener("input", (ev) => {
   searchTerms = ev.target.value.toLowerCase().split(/\s+/).filter(Boolean);
   refresh();
+});
+
+document.getElementById("sortSelect").addEventListener("change", (ev) => {
+  sortMode = ev.target.value;
+  renderCards();
 });
 
 /* ---------- map + data ---------- */
@@ -408,24 +433,38 @@ require([
     },
     popupEnabled: false, // detail lives in the injection-safe cards
   });
+  // Without an explicit cluster `symbol`, ArcGIS falls back to rendering the
+  // nearest individual point's picture-marker underneath the count label —
+  // the category glyph and the number compete for the same small circle.
+  // A solid, uncategorized circle (the site's accent color) gives the count
+  // a clean background of its own.
   layer.featureReduction = {
     type: "cluster",
-    labelingInfo: [{
-    labelExpressionInfo: {
-      expression: "$feature.cluster_count"
-    },
-    deconflictionStrategy: "none",
-    labelPlacement: "center-center",
+    clusterMinSize: 26,
+    clusterMaxSize: 54,
     symbol: {
-      type: "text",
-      color: "white",
-      font: {
-        size: "12px"
+      type: "simple-marker",
+      style: "circle",
+      color: "#901e1e",
+      outline: { color: "white", width: 2 },
+    },
+    labelingInfo: [{
+      labelExpressionInfo: {
+        expression: "$feature.cluster_count"
       },
-      haloSize: 1,
-      haloColor: "black"
-    }
-  }]
+      deconflictionStrategy: "none",
+      labelPlacement: "center-center",
+      symbol: {
+        type: "text",
+        color: "white",
+        font: {
+          size: "12px",
+          weight: "bold",
+        },
+        haloSize: 1,
+        haloColor: "black"
+      }
+    }]
   };
 
   // gray-vector: a muted, low-contrast basemap so the colored/semi-
