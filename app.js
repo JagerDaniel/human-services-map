@@ -197,7 +197,7 @@ function buildCorrectionLink(svc) {
 /* ---------- state ---------- */
 
 let services = [];          // [{...attributes, objectId, hasPoint, state}]
-let layerView = null;
+const categoryLayerViews = {}; // {food: LayerView, housing: LayerView, mental_health: LayerView}
 let mapView = null;
 const activeCategories = new Set(["food", "housing", "mental_health"]);
 let hideClosed = false;
@@ -301,9 +301,13 @@ function zoomTo(svc) {
 }
 
 function applyMapFilter() {
-  if (!layerView) return;
-  const ids = visibleServices().filter((s) => s.hasPoint).map((s) => s.objectId);
-  layerView.filter = { objectIds: ids.length ? ids : [-1] };
+  const visible = visibleServices();
+  for (const cat of Object.keys(categoryLayerViews)) {
+    const lv = categoryLayerViews[cat];
+    if (!lv) continue;
+    const ids = visible.filter((s) => s.hasPoint && s.category === cat).map((s) => s.objectId);
+    lv.filter = { objectIds: ids.length ? ids : [-1] };
+  }
 }
 
 function refresh() {
@@ -420,59 +424,62 @@ require([
   // was visible at zoom 14 but borderline at zoom 13, so sized up further.
   countyLayer.effect = "drop-shadow(4px 4px 12px rgba(0, 0, 0, 0.7)) brightness(1.1)";
 
-  const layer = new FeatureLayer({
-    url: CONFIG.layerUrl,
-    outFields: ["*"],
-    renderer: {
-      type: "unique-value",
-      field: "category",
-      uniqueValueInfos: Object.keys(CATEGORY_COLOR).map((value) => ({
-        value,
-        symbol: { type: "picture-marker", url: pinDataUri(value, 30), width: "30px", height: "30px" },
-      })),
-    },
-    popupEnabled: false, // detail lives in the injection-safe cards
-  });
-  // Without an explicit cluster `symbol`, ArcGIS falls back to rendering the
-  // nearest individual point's picture-marker underneath the count label —
-  // the category glyph and the number compete for the same small circle.
-  // A solid, uncategorized circle (the site's accent color) gives the count
-  // a clean background of its own.
-  layer.featureReduction = {
-    type: "cluster",
-    clusterMinSize: 26,
-    clusterMaxSize: 54,
-    symbol: {
-      type: "simple-marker",
-      style: "circle",
-      color: "#901e1e",
-      outline: { color: "white", width: 2 },
-    },
-    labelingInfo: [{
-      labelExpressionInfo: {
-        expression: "$feature.cluster_count"
+  // A data-only layer, never added to the map: it's just the query target
+  // for building the `services` array (the card list). Clustering/rendering
+  // happens on the three per-category layers below instead.
+  const layer = new FeatureLayer({ url: CONFIG.layerUrl, outFields: ["*"] });
+
+  // One FeatureLayer per category (same service, filtered by
+  // definitionExpression) rather than one layer with a unique-value
+  // renderer. Clustering only ever combines features within a single layer,
+  // so this is what keeps a cluster from mixing food/housing/mental-health
+  // points -- and it lets each layer's cluster symbol just BE that
+  // category's own pin glyph (scaled up) instead of a generic circle,
+  // since every point already-clustered under it is guaranteed that category.
+  const categoryLayers = {};
+  Object.keys(CATEGORY_COLOR).forEach((cat) => {
+    const catLayer = new FeatureLayer({
+      url: CONFIG.layerUrl,
+      definitionExpression: `category = '${cat}'`,
+      outFields: ["*"],
+      renderer: {
+        type: "simple",
+        symbol: { type: "picture-marker", url: pinDataUri(cat, 30), width: "30px", height: "30px" },
       },
-      deconflictionStrategy: "none",
-      labelPlacement: "center-center",
-      symbol: {
-        type: "text",
-        color: "white",
-        font: {
-          size: "12px",
-          weight: "bold",
+      popupEnabled: false, // detail lives in the injection-safe cards
+    });
+    catLayer.featureReduction = {
+      type: "cluster",
+      clusterMinSize: 28, // was 26
+      clusterMaxSize: 52, // was 54
+      symbol: { type: "picture-marker", url: pinDataUri(cat, 44), width: "44px", height: "44px" },
+      labelingInfo: [{
+        labelExpressionInfo: {
+          expression: "$feature.cluster_count"
         },
-        haloSize: 1,
-        haloColor: "black"
-      }
-    }]
-  };
+        deconflictionStrategy: "none",
+        labelPlacement: "center-center",
+        symbol: {
+          type: "text",
+          color: "white",
+          font: {
+            size: "12px",
+            weight: "bold",
+          },
+          haloSize: 1,
+          haloColor: "black"
+        }
+      }]
+    };
+    categoryLayers[cat] = catLayer;
+  });
 
   // gray-vector: a muted, low-contrast basemap so the colored/semi-
   // transparent service pins (the actual point of the map) are the visual
   // focus instead of competing with a busy streets basemap's own colors.
   const map = new Map({
     basemap: "gray-vector",
-    layers: [countyLayer, layer],
+    layers: [countyLayer, ...Object.values(categoryLayers)],
   });
   mapView = new MapView({
     container: "mapView", map,
@@ -483,14 +490,19 @@ require([
   // No secrets here — these are just the public ArcGIS view/layer objects.
   window.__debugMap = map; window.__debugView = mapView; window.__debugCountyLayer = countyLayer;
 
-  mapView.whenLayerView(layer).then((lv) => { layerView = lv; applyMapFilter(); });
+  Object.keys(categoryLayers).forEach((cat) => {
+    mapView.whenLayerView(categoryLayers[cat]).then((lv) => {
+      categoryLayerViews[cat] = lv;
+      applyMapFilter();
+    });
+  });
 
   // Tap a point -> scroll to and highlight its card.
   mapView.on("click", async (event) => {
-    const hit = await mapView.hitTest(event, { include: layer });
+    const hit = await mapView.hitTest(event, { include: Object.values(categoryLayers) });
     const g = hit.results.find((r) => r.graphic && r.graphic.attributes);
     if (!g) return;
-    const oid = g.graphic.attributes[layer.objectIdField];
+    const oid = g.graphic.attributes[g.graphic.layer.objectIdField];
     const card = document.querySelector(`.card[data-object-id="${oid}"]`);
     if (card) {
       card.scrollIntoView({ behavior: "smooth", block: "nearest" });
