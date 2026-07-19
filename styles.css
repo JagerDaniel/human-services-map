@@ -1,5 +1,13 @@
 /* Human Services Web Map — mobile-first, high-contrast, plain-language UI.
-   Audience: people in crisis, often on phones. Big targets, clear text. */
+   Audience: people in crisis, often on phones. Big targets, clear text.
+
+   Visual language matched to https://pets-dashboard.pages.dev/ (Daniel's
+   other public dashboard): a cream page, a beige panel surface, a crimson
+   header bar, and a maroon accent for active controls/status pills. Colors
+   below were read directly from that site's computed styles, not eyeballed.
+   --food/--housing/--mental stay as originally chosen (distinct from the
+   reference, which only has two states) — they're what ties a card's left
+   border to its matching map pin color in app.js. */
 
 * { box-sizing: border-box; }
 
@@ -7,47 +15,74 @@
   --food: #2e7d32;
   --housing: #ef6c00;
   --mental: #6a1b9a;
-  --open: #1b7f3b;
-  --closed: #b3261e;
+  --open: #0f7a57;      /* reference's FOUND green */
+  --closed: #901e1e;    /* reference's MISSING/accent maroon */
   --unknown: #5f6368;
-  --ink: #1f1f1f;
-  --paper: #ffffff;
-  --line: #d7d7d7;
+
+  --bg: #e8e8c8;         /* reference: page background */
+  --sidebar: #f5f5dc;    /* reference: panel/card surface (beige) */
+  --header-bg: #dc143c;  /* reference: header bar (crimson) */
+  --accent: #901e1e;     /* reference: active buttons, links, MISSING pill */
+  --ink: #111111;        /* reference: primary text */
+  --muted: #555555;      /* reference: secondary text */
+  --line: rgba(17, 17, 17, 0.12); /* a light-theme border in the same spirit
+                                     as the reference's mostly-borderless,
+                                     bg-shift-driven separation */
 }
 
 html, body {
   margin: 0;
   height: 100%; /* lets #list become its own scroll pane — see "layout" below */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--ink);
-  background: var(--paper);
+  background: var(--bg);
   font-size: 16px;
   line-height: 1.45;
 }
 
 .skip-link {
   position: absolute; left: -9999px; top: 0;
-  background: #fff; padding: 0.5rem 1rem; z-index: 100;
+  background: var(--sidebar); color: var(--ink);
+  border: 2px solid var(--accent);
+  padding: 0.5rem 1rem; z-index: 100;
 }
 .skip-link:focus { left: 0; }
 
-header { padding: 0.75rem 1rem 0.25rem; }
-h1 { font-size: 1.25rem; margin: 0; }
-.tagline { margin: 0.15rem 0 0; color: #444; font-size: 0.95rem; }
+header {
+  padding: 0.9rem 1rem;
+  text-align: center;
+  background: var(--header-bg);
+  color: #fff;
+}
+h1 {
+  font-family: Calibri, Candara, Segoe, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: #fff;
+}
+.tagline { margin: 0.3rem 0 0; color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; }
+
+@media (min-width: 900px) {
+  h1 { font-size: 1.75rem; }
+}
 
 .disclaimer {
-  margin: 0.5rem 0 0;
+  margin: 0.6rem 1rem 0;
   padding: 0.5rem 0.7rem;
-  background: #fdf3e7;
-  border-left: 4px solid var(--housing);
+  text-align: left;
+  background: var(--sidebar);
+  border-left: 4px solid var(--accent);
   border-radius: 4px;
   font-size: 0.9rem;
+  color: var(--ink);
 }
-.disclaimer strong { display: block; margin-bottom: 0.1rem; }
+.disclaimer strong { display: block; margin-bottom: 0.1rem; color: var(--accent); }
 
 /* --- controls --- */
 
-.controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); }
+.controls { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); background: var(--sidebar); }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -58,20 +93,26 @@ h1 { font-size: 1.25rem; margin: 0; }
 .search-box input {
   width: 100%; max-width: 460px;
   font-size: 1rem; padding: 0.55rem 0.8rem;   /* >=44px touch target */
-  border: 2px solid var(--line); border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  border: 1.6px solid var(--line); border-radius: 7px;
 }
-.search-box input:focus-visible { outline: 3px solid #1a73e8; outline-offset: 1px; }
+.search-box input::placeholder { color: var(--muted); }
+.search-box input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
 .category-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
+/* Pill buttons, matching the reference's Status/Animal filter buttons:
+   inactive = transparent + accent-colored text/border; active = solid
+   accent fill + white text. */
 .cat-btn {
   display: inline-flex; align-items: center; gap: 0.45rem;
-  font-size: 1rem; padding: 0.55rem 0.9rem;      /* >=44px touch target */
-  border: 2px solid var(--line); border-radius: 999px;
-  background: #f2f2f2; color: #555; cursor: pointer;
+  font-size: 0.95rem; font-weight: 600; padding: 0.55rem 0.9rem;  /* >=44px touch target */
+  border: 1.6px solid rgba(144, 30, 30, 0.25); border-radius: 7px;
+  background: transparent; color: var(--accent); cursor: pointer;
 }
-.cat-btn.is-on { background: #fff; color: var(--ink); border-color: #555; }
-.cat-btn:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+.cat-btn.is-on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.cat-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 /* Filled in by JS with the same icon used for the matching map pin
    (background-image, set per data-category — see app.js). */
@@ -79,26 +120,27 @@ h1 { font-size: 1.25rem; margin: 0; }
   width: 1.15rem; height: 1.15rem; display: inline-block;
   background-size: contain; background-repeat: no-repeat; background-position: center;
 }
-.cat-btn:not(.is-on) .dot { opacity: 0.35; }
+.cat-btn:not(.is-on) .dot { opacity: 0.6; }
 
 .hide-closed {
   display: flex; align-items: center; gap: 0.5rem;
   margin-top: 0.4rem; font-size: 1rem;
 }
 .hide-closed input { width: 1.25rem; height: 1.25rem; }
-.fail-open-note { margin: 0.25rem 0 0; font-size: 0.85rem; color: #555; }
+.fail-open-note { margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--muted); }
 
 /* --- layout: map + controls + list ---
    The whole page is pinned to the viewport (html/body height:100%, body a
-   flex column); header/footer take their natural height and #list is the
-   ONLY element that scrolls. This matters on touch devices: a map captures
-   drag gestures for panning, so if reaching the cards required a page-level
+   flex column); header takes its natural height and #list is the ONLY
+   element that scrolls. This matters on touch devices: a map captures drag
+   gestures for panning, so if reaching the cards required a page-level
    swipe that could start over the map, that swipe would pan the map instead
    of scrolling. Giving #list its own bounded, always-visible scroll pane
    below the map means you never need to gesture over the map to reach a
    card — touching the list scrolls the list; touching the map pans the map
    (which is the map's own expected behavior). Same technique on both
-   breakpoints; only the grid arrangement changes. */
+   breakpoints; only the grid arrangement (and, on mobile, the "bottom
+   sheet" framing of #list) changes. */
 
 body { display: flex; flex-direction: column; }
 header { flex: 0 0 auto; }
@@ -110,15 +152,37 @@ main {
   grid-template-areas: "controls" "map" "list";
   grid-template-rows: auto minmax(170px, 28vh) 1fr;
 }
-#mapView { grid-area: map; min-height: 0; }
+#mapView { grid-area: map; min-height: 0; background: var(--bg); }
 .controls { grid-area: controls; }
+
+/* Mobile: #list reads as a dedicated panel "docked" to the bottom of the
+   screen — the same idea as the desktop sidebar, just anchored to the
+   bottom edge instead of a side edge. Rounded top corners + an upward
+   shadow + a decorative grab handle give it that "pinned sheet" identity,
+   using the beige panel surface so it visibly sits above the map. */
 #list {
   grid-area: list;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
   padding: 0.75rem 1rem 2rem;
+  background: var(--sidebar);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.18);
+  position: relative;
 }
+.sheet-handle {
+  position: sticky; top: 0;
+  display: flex; justify-content: center;
+  padding: 0.5rem 0 0.4rem;
+  background: var(--sidebar); /* stays opaque as cards scroll beneath it */
+}
+.sheet-handle::after {
+  content: ""; width: 36px; height: 4px; border-radius: 999px;
+  background: var(--line);
+}
+
 #status { font-weight: 600; }
 
 @media (min-width: 900px) {
@@ -131,7 +195,15 @@ main {
     border-left: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
-  #list { border-left: 1px solid var(--line); }
+  /* Desktop: a flat sidebar column, not a "docked sheet" — no rounded
+     corners/shadow/handle (those are the mobile bottom-sheet affordance). */
+  #list {
+    border-left: 1px solid var(--line);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: none;
+  }
+  .sheet-handle { display: none; }
 }
 
 /* --- cards --- */
@@ -147,33 +219,41 @@ main {
 .card.cat-food { border-left-color: var(--food); }
 .card.cat-housing { border-left-color: var(--housing); }
 .card.cat-mental_health { border-left-color: var(--mental); }
-.card[tabindex]:hover, .card[tabindex]:focus-visible { box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; }
-.card.is-highlighted { outline: 3px solid #1a73e8; }
+.card[tabindex]:hover, .card[tabindex]:focus-visible {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.card.is-highlighted { outline: 3px solid var(--accent); }
 
 .card-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
-.name { font-size: 1.05rem; margin: 0; flex: 1 1 auto; }
+.name { font-size: 1.05rem; margin: 0; flex: 1 1 auto; color: var(--ink); }
 
+/* Tinted pills, matching the reference's MISSING/FOUND status badges:
+   translucent color-tinted background + solid-colored text (not a solid
+   fill with white text). */
 .badge {
-  font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em;
-  padding: 0.15rem 0.6rem; border-radius: 999px; color: #fff; white-space: nowrap;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
+  padding: 0.15rem 0.6rem; border-radius: 10px; white-space: nowrap;
 }
-.badge-open { background: var(--open); }
-.badge-closed { background: var(--closed); }
-.badge-unknown { background: var(--unknown); }
+.badge-open { background: rgba(15, 122, 87, 0.12); color: var(--open); }
+.badge-closed { background: rgba(144, 30, 30, 0.12); color: var(--closed); }
+.badge-unknown { background: rgba(95, 99, 104, 0.12); color: var(--unknown); }
 
-.category-line { margin: 0.25rem 0; color: #444; font-size: 0.9rem; }
+.category-line { margin: 0.25rem 0; color: var(--muted); font-size: 0.9rem; }
 .address, .desc, .hours { margin: 0.3rem 0; }
 .hours { font-weight: 600; }
 
 .confidential-note {
   margin: 0.3rem 0; padding: 0.4rem 0.6rem;
-  background: #fdf3e7; border-radius: 6px; font-weight: 600;
+  background: rgba(144, 30, 30, 0.08);
+  border-left: 3px solid var(--closed);
+  border-radius: 6px; font-weight: 600;
 }
 
 .links { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0.45rem 0 0.1rem; }
-.links a { font-size: 1rem; color: #0b57d0; text-decoration: underline; }
+.links a { font-size: 1rem; color: var(--accent); text-decoration: underline; }
 .links a.phone { font-weight: 700; }
 
-.verified { margin: 0.35rem 0 0; font-size: 0.8rem; color: #666; }
+.verified { margin: 0.35rem 0 0; font-size: 0.8rem; color: var(--muted); }
 
-footer { padding: 0.75rem 1rem 1.5rem; border-top: 1px solid var(--line); font-size: 0.85rem; color: #555; }
+footer { padding: 0.75rem 1rem 1.5rem; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }

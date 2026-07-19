@@ -71,6 +71,9 @@
       <p class="fail-open-note">Places with unknown hours are always shown.</p>
     </nav>
     <section id="list" aria-label="List of services">
+      <!-- Decorative "grab handle" — the mobile bottom-sheet affordance
+           (hidden on desktop, where #list is a flat sidebar). -->
+      <div class="sheet-handle" aria-hidden="true"></div>
       <p id="status" role="status">Loading services…</p>
       <div id="cards"></div>
       <!-- Scrolls with the list (not pinned) — it's supplementary, the
