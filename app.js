@@ -23,11 +23,104 @@ const CONFIG = {
   refreshSeconds: 60, // re-evaluate open/closed badges this often
 };
 
-const CATEGORY_LABEL = {
-  food: "Food",
-  housing: "Housing",
-  mental_health: "Mental health",
+/* ---------- i18n (English + Mexican Spanish) ----------
+ * i18next is loaded in index.html. The DATA (service names/descriptions) stays
+ * as discovered; only the UI chrome, badges, and the plain-language hours are
+ * translated. Language persists in localStorage and defaults to the browser's
+ * preference (es-* -> Spanish), so a Spanish-first visitor lands in Spanish. */
+const I18N = {
+  en: {
+    skipLink: "Skip to the list of services",
+    h1: "Find Help in Kittitas and Yakima Counties",
+    tagline: "Free food, housing, and mental-health services in Kittitas and Yakima counties.",
+    disclaimerShort: "Please call ahead to confirm details.",
+    disclaimerLead: "Please double-check before you go.",
+    disclaimerRest: "Call the number listed to confirm hours, address, and what to bring — details can change.",
+    controlsToggle: "Search & filters",
+    tapExpand: "Tap to expand",
+    tapCollapse: "Tap to collapse",
+    searchPlaceholder: "Search — e.g. veterans, shelter, WIC, Sunnyside",
+    sortLabel: "Sort",
+    sortOpen: "Open first",
+    sortAlpha: "Alphabetical",
+    hideClosed: "Hide places closed right now",
+    failOpenNote: "Places with unknown hours are always shown.",
+    sheetTitle: "Location Details",
+    sheetHint: "Address, hours & phone",
+    footerPacific: "Hours shown in Pacific time.",
+    reportCorrection: "Report a correction",
+    statusLoading: "Loading services…",
+    loadError: "Could not load services. Please try again later.",
+    loadingSlow: "Still loading… If you are developing against the private view, complete the ArcGIS sign-in prompt (the public site will not ask).",
+    countShown_one: "{{count}} service shown",
+    countShown_other: "{{count}} services shown",
+    noMatch: "No services match your filters. Try turning on more categories, clearing the search box, or unchecking “Hide places closed right now.”",
+    cat: { food: "Food", housing: "Housing", mental_health: "Mental health" },
+    free: "Free",
+    slidingScale: "Sliding-scale cost",
+    confidentialNote: "Confidential location — call for help. No address is shown for safety.",
+    lastVerified: "Last verified {{date}}",
+    badge: { open: "Open now", closed: "Closed now", unknown: "Hours unknown" },
+    hoursUnknownLong: "Hours unknown — call to check",
+    open247: "Open 24 hours, every day",
+    days: { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun", PH: "holidays" },
+    to: "to", and: "and", closed: "closed", am: "AM", pm: "PM", last: "last",
+    ord: { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th" },
+  },
+  es: {
+    skipLink: "Saltar a la lista de servicios",
+    h1: "Encuentra ayuda en los condados de Kittitas y Yakima",
+    tagline: "Servicios gratuitos de comida, vivienda y salud mental en los condados de Kittitas y Yakima.",
+    disclaimerShort: "Por favor llama antes de ir para confirmar la información.",
+    disclaimerLead: "Por favor confirma antes de ir.",
+    disclaimerRest: "Llama al número indicado para confirmar el horario, la dirección y qué llevar; la información puede cambiar.",
+    controlsToggle: "Buscar y filtrar",
+    tapExpand: "Toca para abrir",
+    tapCollapse: "Toca para cerrar",
+    searchPlaceholder: "Buscar — p. ej. veteranos, refugio, WIC, Sunnyside",
+    sortLabel: "Ordenar",
+    sortOpen: "Abiertos primero",
+    sortAlpha: "Alfabético",
+    hideClosed: "Ocultar lugares cerrados ahora",
+    failOpenNote: "Los lugares con horario desconocido siempre se muestran.",
+    sheetTitle: "Detalles del lugar",
+    sheetHint: "Dirección, horario y teléfono",
+    footerPacific: "Horario en hora del Pacífico.",
+    reportCorrection: "Reportar una corrección",
+    statusLoading: "Cargando servicios…",
+    loadError: "No se pudieron cargar los servicios. Inténtalo de nuevo más tarde.",
+    loadingSlow: "Cargando aún… Si estás desarrollando con la vista privada, completa el inicio de sesión de ArcGIS (el sitio público no lo pide).",
+    countShown_one: "{{count}} servicio mostrado",
+    countShown_other: "{{count}} servicios mostrados",
+    noMatch: "Ningún servicio coincide con tus filtros. Prueba activar más categorías, borrar la búsqueda o desmarcar «Ocultar lugares cerrados ahora».",
+    cat: { food: "Comida", housing: "Vivienda", mental_health: "Salud mental" },
+    free: "Gratis",
+    slidingScale: "Costo según ingresos",
+    confidentialNote: "Ubicación confidencial: llama para pedir ayuda. Por seguridad no se muestra la dirección.",
+    lastVerified: "Verificado por última vez el {{date}}",
+    badge: { open: "Abierto ahora", closed: "Cerrado ahora", unknown: "Horario desconocido" },
+    hoursUnknownLong: "Horario desconocido; llama para confirmar",
+    open247: "Abierto las 24 horas, todos los días",
+    days: { Mo: "Lun", Tu: "Mar", We: "Mié", Th: "Jue", Fr: "Vie", Sa: "Sáb", Su: "Dom", PH: "días festivos" },
+    to: "a", and: "y", closed: "cerrado", am: "a.m.", pm: "p.m.", last: "último",
+    ord: { 1: "1.º", 2: "2.º", 3: "3.º", 4: "4.º", 5: "5.º" },
+  },
 };
+
+function pickInitialLang() {
+  const saved = localStorage.getItem("hs-lang");
+  if (saved === "en" || saved === "es") return saved;
+  return (navigator.language || "en").toLowerCase().startsWith("es") ? "es" : "en";
+}
+
+i18next.init({
+  lng: pickInitialLang(),
+  fallbackLng: "en",
+  resources: { en: { translation: I18N.en }, es: { translation: I18N.es } },
+});
+const t = (key, opts) => i18next.t(key, opts);
+const dateLocale = () => (i18next.language === "es" ? "es-MX" : "en-US");
+
 const CATEGORY_COLOR = {
   food: "#5b7a3a",
   housing: "#b5652e",
@@ -105,36 +198,36 @@ function openState(hoursOsm) {
 
 /* ---------- plain-language hours ---------- */
 
-const DAY_NAMES = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun", PH: "holidays" };
+function dayName(code) { return t("days." + code, { defaultValue: code }); }
 
 function fmtTime(hhmm) {
   const [h, m] = hhmm.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
   const am = h < 12;
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2, "0")} ${am ? "AM" : "PM"}`;
+  return `${h12}:${String(m).padStart(2, "0")} ${am ? t("am") : t("pm")}`;
 }
 
 function ordinal(n) {
-  if (n === -1) return "last";
-  return { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th" }[n] || n + "th";
+  if (n === -1) return t("last");
+  return t("ord." + n, { defaultValue: String(n) });
 }
 
 /* One day token: "Mo", "Mo-Fr", or "Th[2,4]" (nth weekday of the month). */
 function humanDayToken(token) {
   const nth = token.match(/^([A-Za-z]{2})\[([-\d,]+)\]$/);
   if (nth) {
-    const day = DAY_NAMES[nth[1]] || nth[1];
+    const day = dayName(nth[1]);
     const ords = nth[2].split(",").map((x) => ordinal(parseInt(x, 10)));
-    return ords.join(" & ") + " " + day;
+    return ords.join(" " + t("and") + " ") + " " + day;
   }
-  return token.split("-").map((x) => DAY_NAMES[x] || x).join("–");
+  return token.split("-").map(dayName).join("–");
 }
 
 function humanHours(hoursOsm) {
-  if (!hoursOsm || !String(hoursOsm).trim()) return "Hours unknown — call to check";
+  if (!hoursOsm || !String(hoursOsm).trim()) return t("hoursUnknownLong");
   const s = String(hoursOsm).trim();
-  if (s === "24/7") return "Open 24 hours, every day";
+  if (s === "24/7") return t("open247");
   // Translate the validated subset (day selectors incl. Day[n] monthly
   // patterns + 24h ranges); anything surprising falls back to the raw string.
   try {
@@ -146,8 +239,8 @@ function humanHours(hoursOsm) {
       let days = (m[1] || "").split(/,(?![-\d,]*\])/).filter(Boolean)
         .map(humanDayToken).join(", ");
       let times = m[2] || "";
-      if (/^(off|closed)$/i.test(times)) times = "closed";
-      else times = times.split(",").map((r) => r.split("-").map(fmtTime).join(" to ")).join(" and ");
+      if (/^(off|closed)$/i.test(times)) times = t("closed");
+      else times = times.split(",").map((r) => r.split("-").map(fmtTime).join(" " + t("to") + " ")).join(" " + t("and") + " ");
       return [days, times].filter(Boolean).join(" ");
     }).join("; ");
   } catch (e) {
@@ -188,7 +281,7 @@ function webLink(url) {
 
 function buildCorrectionLink(svc) {
   if (!CONFIG.correctionEmail) return null;
-  const a = el("a", "correction", "Report a correction");
+  const a = el("a", "correction", t("reportCorrection"));
   a.href = "mailto:" + encodeURIComponent(CONFIG.correctionEmail) +
     "?subject=" + encodeURIComponent(`Correction: ${svc.name} [${svc.service_id || "?"}]`);
   return a;
@@ -235,9 +328,8 @@ function renderCards() {
 
   const status = document.getElementById("status");
   status.textContent = visible.length
-    ? `${visible.length} service${visible.length === 1 ? "" : "s"} shown`
-    : "No services match your filters. Try turning on more categories, " +
-      "clearing the search box, or unchecking “Hide places closed right now.”";
+    ? t("countShown", { count: visible.length })
+    : t("noMatch");
 
   for (const svc of visible) {
     const card = el("article", "card cat-" + svc.category);
@@ -246,19 +338,17 @@ function renderCards() {
 
     const head = el("div", "card-head");
     head.appendChild(el("h2", "name", svc.name));
-    const badge = el("span", "badge badge-" + svc.state,
-      svc.state === "open" ? "Open now" : svc.state === "closed" ? "Closed now" : "Hours unknown");
+    const badge = el("span", "badge badge-" + svc.state, t("badge." + svc.state));
     head.appendChild(badge);
     card.appendChild(head);
 
     card.appendChild(el("p", "category-line",
-      CATEGORY_LABEL[svc.category] +
-      (svc.eligibility_cost === "free" ? " · Free"
-        : svc.eligibility_cost === "sliding_scale" ? " · Sliding-scale cost" : "")));
+      t("cat." + svc.category, { defaultValue: svc.category }) +
+      (svc.eligibility_cost === "free" ? " · " + t("free")
+        : svc.eligibility_cost === "sliding_scale" ? " · " + t("slidingScale") : "")));
 
     if (svc.is_confidential) {
-      card.appendChild(el("p", "confidential-note",
-        "Confidential location — call for help. No address is shown for safety."));
+      card.appendChild(el("p", "confidential-note", t("confidentialNote")));
     } else if (svc.address) {
       card.appendChild(el("p", "address", svc.address));
     }
@@ -281,8 +371,8 @@ function renderCards() {
       // ArcGIS dates are epoch ms at UTC midnight; format in UTC so the
       // calendar date doesn't shift back a day for US visitors.
       card.appendChild(el("p", "verified",
-        "Last verified " + new Date(svc.last_verified).toLocaleDateString("en-US",
-          { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })));
+        t("lastVerified", { date: new Date(svc.last_verified).toLocaleDateString(dateLocale(),
+          { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }) })));
     }
 
     if (svc.hasPoint) {
@@ -328,7 +418,7 @@ sheetToggle.addEventListener("click", () => {
   const expanded = sheetToggle.getAttribute("aria-expanded") === "true";
   sheetToggle.setAttribute("aria-expanded", String(!expanded));
   document.querySelector("main").classList.toggle("sheet-expanded", !expanded);
-  sheetHint.textContent = expanded ? "Address, hours & phone" : "Tap to collapse";
+  sheetHint.textContent = expanded ? t("sheetHint") : t("tapCollapse");
 });
 
 // Mobile-only search/filters drawer — same collapsed-by-default idea as the
@@ -341,8 +431,51 @@ controlsToggle.addEventListener("click", () => {
   const expanded = controlsToggle.getAttribute("aria-expanded") === "true";
   controlsToggle.setAttribute("aria-expanded", String(!expanded));
   controlsToggle.closest(".controls").classList.toggle("expanded", !expanded);
-  controlsHint.textContent = expanded ? "Tap to expand" : "Tap to collapse";
+  controlsHint.textContent = expanded ? t("tapExpand") : t("tapCollapse");
 });
+
+/* ---------- i18n application + language switch ---------- */
+
+// Re-apply each collapse/expand hint in the current language, reading the
+// toggle's current state (so a mid-session language switch is correct).
+function refreshToggleHints() {
+  const sheetExpanded = sheetToggle.getAttribute("aria-expanded") === "true";
+  sheetHint.textContent = sheetExpanded ? t("tapCollapse") : t("sheetHint");
+  const ctrlExpanded = controlsToggle.getAttribute("aria-expanded") === "true";
+  controlsHint.textContent = ctrlExpanded ? t("tapCollapse") : t("tapExpand");
+}
+
+// Set all static UI text from the translation table. [data-i18n] -> textContent,
+// [data-i18n-ph] -> placeholder. Dynamic content (cards) is redrawn separately.
+function applyStaticI18n() {
+  document.documentElement.lang = i18next.language;
+  document.querySelectorAll("[data-i18n]").forEach((n) => {
+    n.textContent = t(n.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach((n) => {
+    n.setAttribute("placeholder", t(n.dataset.i18nPh));
+  });
+  refreshToggleHints();
+  document.querySelectorAll(".lang-btn").forEach((b) => {
+    const on = b.dataset.lang === i18next.language;
+    b.classList.toggle("is-on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+}
+
+function setLanguage(lng) {
+  i18next.changeLanguage(lng, () => {
+    localStorage.setItem("hs-lang", lng);
+    applyStaticI18n();
+    if (services.length) renderCards(); // redraw badges/hours/status in the new language
+  });
+}
+
+document.querySelectorAll(".lang-btn").forEach((b) => {
+  b.addEventListener("click", () => setLanguage(b.dataset.lang));
+});
+
+applyStaticI18n(); // apply the initial (saved / browser-detected) language
 
 // Filter-button dots use the exact same glyphs as the map pins, so the
 // legend and the map teach each other.
@@ -528,13 +661,9 @@ require([
   // Dev-mode watchdog: while the view is shared privately, the query waits on
   // an ArcGIS sign-in. Explain the hang instead of showing "Loading…" forever.
   // Harmless at launch (the public view resolves long before this fires).
+  let dataLoaded = false; // language-agnostic (status text may be translated)
   const loadingWatchdog = setTimeout(() => {
-    const status = document.getElementById("status");
-    if (status.textContent.startsWith("Loading")) {
-      status.textContent =
-        "Still loading… If you are developing against the private view, " +
-        "complete the ArcGIS sign-in prompt (the public site will not ask).";
-    }
+    if (!dataLoaded) document.getElementById("status").textContent = t("loadingSlow");
   }, 15000);
 
   // One query for everything (small dataset): confidential rows have no
@@ -545,6 +674,7 @@ require([
     returnGeometry: true,
   }).then((result) => {
     clearTimeout(loadingWatchdog);
+    dataLoaded = true;
     services = result.features.map((f) => ({
       ...f.attributes,
       objectId: f.attributes[layer.objectIdField],
@@ -556,8 +686,8 @@ require([
     setInterval(refresh, CONFIG.refreshSeconds * 1000);
   }).catch((err) => {
     clearTimeout(loadingWatchdog);
-    document.getElementById("status").textContent =
-      "Could not load services. Please try again later.";
+    dataLoaded = true;
+    document.getElementById("status").textContent = t("loadError");
     console.error("query failed:", err);
   });
 });

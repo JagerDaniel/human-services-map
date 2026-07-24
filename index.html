@@ -34,15 +34,20 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <a class="skip-link" href="#list">Skip to the list of services</a>
+  <a class="skip-link" href="#list" data-i18n="skipLink">Skip to the list of services</a>
 
   <header>
-    <h1>Find Help in Kittitas and Yakima Counties</h1>
-    <p class="tagline">Free food, housing, and mental-health services in Kittitas and Yakima counties.</p>
-    <p class="disclaimer disclaimer-short">Please call ahead to confirm details.</p>
+    <div class="lang-switch" role="group" aria-label="Language / Idioma">
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="true" lang="en">English</button>
+      <button type="button" class="lang-btn" data-lang="es" aria-pressed="false" lang="es">Español</button>
+    </div>
+    <h1 data-i18n="h1">Find Help in Kittitas and Yakima Counties</h1>
+    <p class="tagline" data-i18n="tagline">Free food, housing, and mental-health services in Kittitas and Yakima counties.</p>
+    <p class="disclaimer disclaimer-short" data-i18n="disclaimerShort">Please call ahead to confirm details.</p>
     <p class="disclaimer disclaimer-long">
-      <strong>Please double-check before you go.</strong> Call the number listed
-      to confirm hours, address, and what to bring — details can change.
+      <strong data-i18n="disclaimerLead">Please double-check before you go.</strong>
+      <span data-i18n="disclaimerRest">Call the number listed
+      to confirm hours, address, and what to bring — details can change.</span>
     </p>
   </header>
 
@@ -54,38 +59,39 @@
            is visible without scrolling. Desktop always shows this expanded
            (see the 900px breakpoint) — there's no collapse there. -->
       <button type="button" id="controlsToggle" class="controls-toggle" aria-expanded="false" aria-controls="controlsContent">
-        <span>Search &amp; filters</span>
+        <span data-i18n="controlsToggle">Search &amp; filters</span>
         <span class="controls-toggle-hint">Tap to expand</span>
       </button>
       <div id="controlsContent" class="controls-content">
         <div class="search-box">
-          <label for="searchInput" class="visually-hidden">Search services</label>
+          <label for="searchInput" class="visually-hidden" data-i18n="searchPlaceholder">Search services</label>
           <input id="searchInput" type="search" autocomplete="off"
+                 data-i18n-ph="searchPlaceholder"
                  placeholder="Search — e.g. veterans, shelter, WIC, Sunnyside" />
         </div>
         <div class="sort-box">
-          <label for="sortSelect">Sort</label>
+          <label for="sortSelect" data-i18n="sortLabel">Sort</label>
           <select id="sortSelect">
-            <option value="open" selected>Open first</option>
-            <option value="alpha">Alphabetical</option>
+            <option value="open" selected data-i18n="sortOpen">Open first</option>
+            <option value="alpha" data-i18n="sortAlpha">Alphabetical</option>
           </select>
         </div>
         <div class="category-buttons" role="group" aria-label="Show categories">
           <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
-            <span class="dot" data-category="food" aria-hidden="true"></span>Food
+            <span class="dot" data-category="food" aria-hidden="true"></span><span data-i18n="cat.food">Food</span>
           </button>
           <button type="button" class="cat-btn is-on" data-category="housing" aria-pressed="true">
-            <span class="dot" data-category="housing" aria-hidden="true"></span>Housing
+            <span class="dot" data-category="housing" aria-hidden="true"></span><span data-i18n="cat.housing">Housing</span>
           </button>
           <button type="button" class="cat-btn is-on" data-category="mental_health" aria-pressed="true">
-            <span class="dot" data-category="mental_health" aria-hidden="true"></span>Mental health
+            <span class="dot" data-category="mental_health" aria-hidden="true"></span><span data-i18n="cat.mental_health">Mental health</span>
           </button>
         </div>
         <label class="hide-closed">
           <input type="checkbox" id="hideClosed" />
-          Hide places closed right now
+          <span data-i18n="hideClosed">Hide places closed right now</span>
         </label>
-        <p class="fail-open-note">Places with unknown hours are always shown.</p>
+        <p class="fail-open-note" data-i18n="failOpenNote">Places with unknown hours are always shown.</p>
       </div>
     </nav>
     <section id="list" aria-label="List of services">
@@ -96,17 +102,17 @@
       <button type="button" id="sheetToggle" class="sheet-handle" aria-expanded="false" aria-controls="listContent">
         <span class="handle-bar" aria-hidden="true"></span>
         <span class="sheet-toggle-text">
-          <strong>Location Details</strong>
+          <strong data-i18n="sheetTitle">Location Details</strong>
           <span class="sheet-toggle-hint">Address, hours &amp; phone</span>
         </span>
       </button>
       <div id="listContent" class="list-content">
-        <p id="status" role="status">Loading services…</p>
+        <p id="status" role="status" data-i18n="statusLoading">Loading services…</p>
         <div id="cards"></div>
         <!-- Scrolls with the list (not pinned) — it's supplementary, the
              on-page disclaimer already carries the safety-critical message. -->
         <footer>
-          <p>Hours shown in Pacific time. <span id="correctionSlot"></span></p>
+          <p><span data-i18n="footerPacific">Hours shown in Pacific time.</span> <span id="correctionSlot"></span></p>
         </footer>
       </div>
     </section>

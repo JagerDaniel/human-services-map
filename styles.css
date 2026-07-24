@@ -75,6 +75,18 @@ h1 {
   .tagline { margin: 0.3rem 0 0; font-size: 0.95rem; }
 }
 
+/* Language toggle — its own right-aligned row above the title, so it never
+   overlaps the heading on a narrow phone. */
+.lang-switch { display: flex; justify-content: flex-end; gap: 0.3rem; margin: 0 0 0.15rem; }
+.lang-btn {
+  font: inherit; font-size: 0.78rem; font-weight: 600;
+  padding: 0.3rem 0.6rem; min-height: 32px;
+  border: 1.4px solid rgba(255, 255, 255, 0.55); border-radius: 6px;
+  background: transparent; color: #fff; cursor: pointer;
+}
+.lang-btn.is-on { background: #fff; color: var(--header-bg); border-color: #fff; }
+.lang-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
 /* Two disclaimer variants sharing one base look; only one is ever visible at
    a time. Mobile shows the short one-line "flag" (fits the narrowest phone
    without wrapping); desktop has room for the longer, friendlier version
