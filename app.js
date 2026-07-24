@@ -436,6 +436,15 @@ require([
   // points -- and it lets each layer's cluster symbol just BE that
   // category's own pin glyph (scaled up) instead of a generic circle,
   // since every point already-clustered under it is guaranteed that category.
+  // Cluster config per category — a factory so the same config can be
+  // re-applied when clustering is toggled back on by zoom (see CLUSTER_MAX_ZOOM).
+  const clusterReductionFor = (cat) => ({
+    type: "cluster",
+    clusterMinSize: 28, // was 26
+    clusterMaxSize: 44, // was 52
+    symbol: { type: "picture-marker", url: pinDataUri(cat, 44), width: "44px", height: "44px" },
+  });
+
   const categoryLayers = {};
   Object.keys(CATEGORY_COLOR).forEach((cat) => {
     const catLayer = new FeatureLayer({
@@ -448,12 +457,7 @@ require([
       },
       popupEnabled: false, // detail lives in the injection-safe cards
     });
-    catLayer.featureReduction = {
-      type: "cluster",
-      clusterMinSize: 28, // was 26
-      clusterMaxSize: 44, // was 52
-      symbol: { type: "picture-marker", url: pinDataUri(cat, 44), width: "44px", height: "44px" },
-    };
+    catLayer.featureReduction = clusterReductionFor(cat);
     categoryLayers[cat] = catLayer;
   });
 
@@ -480,12 +484,39 @@ require([
     });
   });
 
-  // Tap a point -> scroll to and highlight its card.
+  // Turn clustering OFF past street level so points that clustering keeps
+  // merged even when zoomed in — including providers co-located at one address
+  // — separate into individual, clickable pins. Below the threshold, clustering
+  // keeps the two-county overview readable. (Truly identical coordinates still
+  // overlap; that would need spiderfication, tracked separately.)
+  const CLUSTER_MAX_ZOOM = 15;
+  const applyClusterForZoom = () => {
+    const clustered = mapView.zoom <= CLUSTER_MAX_ZOOM;
+    Object.entries(categoryLayers).forEach(([cat, lyr]) => {
+      if (clustered && !lyr.featureReduction) {
+        lyr.featureReduction = clusterReductionFor(cat);
+      } else if (!clustered && lyr.featureReduction) {
+        lyr.featureReduction = null;
+      }
+    });
+  };
+  mapView.watch("zoom", applyClusterForZoom);
+
+  // Tap a pin -> scroll to and highlight its card. Tapping a CLUSTER can't map
+  // to a single card (a cluster graphic is an aggregate with no feature
+  // OBJECTID), so drill in to expand it instead — the next tap lands on an
+  // individual pin. Without this, tapping any clustered pin (common for the
+  // dense food category) silently did nothing.
   mapView.on("click", async (event) => {
     const hit = await mapView.hitTest(event, { include: Object.values(categoryLayers) });
     const g = hit.results.find((r) => r.graphic && r.graphic.attributes);
     if (!g) return;
-    const oid = g.graphic.attributes[g.graphic.layer.objectIdField];
+    const graphic = g.graphic;
+    if (graphic.isAggregate) {
+      mapView.goTo({ target: graphic.geometry, zoom: mapView.zoom + 2 }).catch(() => {});
+      return;
+    }
+    const oid = graphic.attributes[graphic.layer.objectIdField];
     const card = document.querySelector(`.card[data-object-id="${oid}"]`);
     if (card) {
       card.scrollIntoView({ behavior: "smooth", block: "nearest" });
