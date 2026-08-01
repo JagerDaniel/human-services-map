@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Food, Housing &amp; Mental Health Help — Kittitas &amp; Yakima Counties</title>
-  <meta name="description"
+  <!-- The static English title/description are the crawler-visible fallback;
+       app.js re-sets both to the visitor's language on load. -->
+  <meta name="description" data-i18n-content="metaDescription"
         content="Free map of food, housing, and mental-health services in Kittitas and Yakima counties, Washington." />
 
   <!-- opening_hours.js + its two dependencies (pinned + SRI). These MUST load
@@ -52,8 +54,8 @@
   </header>
 
   <main>
-    <div id="mapView" aria-label="Map of services"></div>
-    <nav class="controls" aria-label="Filter services">
+    <div id="mapView" data-i18n-aria="ariaMap" aria-label="Map of services"></div>
+    <nav class="controls" data-i18n-aria="ariaFilters" aria-label="Filter services">
       <!-- Mobile-only collapsible drawer (same collapsed-by-default idea as
            the bottom sheet): keeps the intro stack short on load so the map
            is visible without scrolling. Desktop always shows this expanded
@@ -76,7 +78,7 @@
             <option value="alpha" data-i18n="sortAlpha">Alphabetical</option>
           </select>
         </div>
-        <div class="category-buttons" role="group" aria-label="Show categories">
+        <div class="category-buttons" role="group" data-i18n-aria="ariaCategories" aria-label="Show categories">
           <button type="button" class="cat-btn is-on" data-category="food" aria-pressed="true">
             <span class="dot" data-category="food" aria-hidden="true"></span><span data-i18n="cat.food">Food</span>
           </button>
@@ -94,7 +96,7 @@
         <p class="fail-open-note" data-i18n="failOpenNote">Places with unknown hours are always shown.</p>
       </div>
     </nav>
-    <section id="list" aria-label="List of services">
+    <section id="list" data-i18n-aria="ariaList" aria-label="List of services">
       <!-- Mobile bottom-sheet toggle: collapsed by default so the map gets
            most of the screen; tapping this reveals the actual list. On
            desktop this is hidden and .list-content is always shown (see

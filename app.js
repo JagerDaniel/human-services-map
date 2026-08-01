@@ -30,6 +30,8 @@ const CONFIG = {
  * preference (es-* -> Spanish), so a Spanish-first visitor lands in Spanish. */
 const I18N = {
   en: {
+    docTitle: "Food, Housing & Mental Health Help — Kittitas & Yakima Counties",
+    metaDescription: "Free map of food, housing, and mental-health services in Kittitas and Yakima counties, Washington.",
     skipLink: "Skip to the list of services",
     h1: "Find Help in Kittitas and Yakima Counties",
     tagline: "Free food, housing, and mental-health services in Kittitas and Yakima counties.",
@@ -47,6 +49,12 @@ const I18N = {
     failOpenNote: "Places with unknown hours are always shown.",
     sheetTitle: "Location Details",
     sheetHint: "Address, hours & phone",
+    // Screen-reader landmark labels — never visible, so they were the easiest
+    // strings to miss; a Spanish screen-reader user heard English landmarks.
+    ariaMap: "Map of services",
+    ariaFilters: "Filter services",
+    ariaCategories: "Show categories",
+    ariaList: "List of services",
     footerPacific: "Hours shown in Pacific time.",
     reportCorrection: "Report a correction",
     statusLoading: "Loading services…",
@@ -68,6 +76,8 @@ const I18N = {
     ord: { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th" },
   },
   es: {
+    docTitle: "Ayuda con comida, vivienda y salud mental — Condados de Kittitas y Yakima",
+    metaDescription: "Mapa gratuito de servicios de comida, vivienda y salud mental en los condados de Kittitas y Yakima, Washington.",
     skipLink: "Saltar a la lista de servicios",
     h1: "Encuentra ayuda en los condados de Kittitas y Yakima",
     tagline: "Servicios gratuitos de comida, vivienda y salud mental en los condados de Kittitas y Yakima.",
@@ -85,6 +95,10 @@ const I18N = {
     failOpenNote: "Los lugares con horario desconocido siempre se muestran.",
     sheetTitle: "Detalles del lugar",
     sheetHint: "Dirección, horario y teléfono",
+    ariaMap: "Mapa de servicios",
+    ariaFilters: "Filtrar servicios",
+    ariaCategories: "Mostrar categorías",
+    ariaList: "Lista de servicios",
     footerPacific: "Horario en hora del Pacífico.",
     reportCorrection: "Reportar una corrección",
     statusLoading: "Cargando servicios…",
@@ -119,7 +133,11 @@ i18next.init({
   resources: { en: { translation: I18N.en }, es: { translation: I18N.es } },
 });
 const t = (key, opts) => i18next.t(key, opts);
-const dateLocale = () => (i18next.language === "es" ? "es-MX" : "en-US");
+// Full BCP-47 tag, not the bare i18next code: it sets <html lang> (so a screen
+// reader picks the Mexican Spanish voice rather than a generic/Castilian one)
+// and formats dates as es-MX.
+const LOCALE_TAG = { en: "en-US", es: "es-MX" };
+const localeTag = () => LOCALE_TAG[i18next.language] || "en-US";
 
 const CATEGORY_COLOR = {
   food: "#5b7a3a",
@@ -371,7 +389,7 @@ function renderCards() {
       // ArcGIS dates are epoch ms at UTC midnight; format in UTC so the
       // calendar date doesn't shift back a day for US visitors.
       card.appendChild(el("p", "verified",
-        t("lastVerified", { date: new Date(svc.last_verified).toLocaleDateString(dateLocale(),
+        t("lastVerified", { date: new Date(svc.last_verified).toLocaleDateString(localeTag(),
           { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }) })));
     }
 
@@ -446,14 +464,23 @@ function refreshToggleHints() {
 }
 
 // Set all static UI text from the translation table. [data-i18n] -> textContent,
-// [data-i18n-ph] -> placeholder. Dynamic content (cards) is redrawn separately.
+// [data-i18n-ph] -> placeholder, [data-i18n-aria] -> aria-label (screen-reader
+// landmarks), [data-i18n-content] -> content (the <meta> description).
+// Dynamic content (cards) is redrawn separately.
 function applyStaticI18n() {
-  document.documentElement.lang = i18next.language;
+  document.documentElement.lang = localeTag();
+  document.title = t("docTitle");
   document.querySelectorAll("[data-i18n]").forEach((n) => {
     n.textContent = t(n.dataset.i18n);
   });
   document.querySelectorAll("[data-i18n-ph]").forEach((n) => {
     n.setAttribute("placeholder", t(n.dataset.i18nPh));
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((n) => {
+    n.setAttribute("aria-label", t(n.dataset.i18nAria));
+  });
+  document.querySelectorAll("[data-i18n-content]").forEach((n) => {
+    n.setAttribute("content", t(n.dataset.i18nContent));
   });
   refreshToggleHints();
   document.querySelectorAll(".lang-btn").forEach((b) => {
