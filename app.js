@@ -315,9 +315,19 @@ let hideClosed = false;
 let searchTerms = []; // lowercased words; every word must match somewhere
 let sortMode = "open"; // "open" (open now, then unknown, then closed) | "alpha"
 
+/* The description in the reader's language. Falls back to English whenever the
+ * Spanish translation is missing (services_desc_es is NULL until the promotion
+ * step translates a row), so an untranslated record shows English rather than
+ * a blank card — the same fail-open rule the hours logic follows. */
+function describe(svc) {
+  return (i18next.language === "es" && svc.services_desc_es) || svc.services_desc;
+}
+
 function matchesSearch(svc) {
   if (!searchTerms.length) return true;
-  const hay = [svc.name, svc.services_desc, svc.address]
+  // Both languages are always searched, regardless of the UI language, so
+  // "comida" and "food" each find the record whichever way the page is set.
+  const hay = [svc.name, svc.services_desc, svc.services_desc_es, svc.address]
     .filter(Boolean).join(" ").toLowerCase();
   return searchTerms.every((t) => hay.includes(t));
 }
@@ -371,7 +381,8 @@ function renderCards() {
       card.appendChild(el("p", "address", svc.address));
     }
 
-    if (svc.services_desc) card.appendChild(el("p", "desc", svc.services_desc));
+    const desc = describe(svc);
+    if (desc) card.appendChild(el("p", "desc", desc));
     // 24/7 already reads "Open now" from the badge above; a second line
     // saying "Open 24 hours, every day" is a redundant restatement.
     if (String(svc.hours_osm || "").trim() !== "24/7") {
