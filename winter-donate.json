@@ -1,0 +1,21 @@
+{
+  "_comment": "Hand-maintained donation/volunteer info for the winter page. Every entry needs a source_url and a checked date (YYYY-MM-DD) set by a human who confirmed it. Plain text only. Never add a payment link or account number you have not confirmed with the organization itself.",
+  "entries": [
+    {
+      "name": "Ellensburg Cold Weather Shelter (Grace Episcopal Church, 1201 N B St)",
+      "how_en": "Volunteers, catered meals and food donations help run the shelter. The page does not list a donation phone or link; ask the City of Ellensburg Housing Program Manager.",
+      "how_es": "Los voluntarios, las comidas donadas y las donaciones de alimentos ayudan a operar el refugio. La página no da un teléfono ni un enlace para donar; pregunta a la gerente del programa de vivienda de la Ciudad de Ellensburg.",
+      "contact_email": "freyl@ellensburgwa.gov",
+      "source_url": "https://ellensburgwa.gov/1244/Cold-Weather-Shelter",
+      "checked": null
+    },
+    {
+      "name": "Rod's House (Yakima, young adults and youth)",
+      "how_en": "Warm clothing (coats, hand warmers, socks) and food have been requested in past winters. Needs may have changed — contact them first.",
+      "how_es": "En inviernos pasados han pedido ropa abrigadora (abrigos, calentadores de manos, calcetines) y comida. Las necesidades pueden haber cambiado; contáctalos primero.",
+      "contact_email": null,
+      "source_url": "https://www.fox41yakima.com/rods-house-in-need-of-winter-donations/",
+      "checked": null
+    }
+  ]
+}

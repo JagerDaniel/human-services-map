@@ -5,3 +5,7 @@ copy /Y "C:\Projects\humanservices\webmap\index.html" .
 copy /Y "C:\Projects\humanservices\webmap\app.js" .
 copy /Y "C:\Projects\humanservices\webmap\styles.css" .
 echo Synced. Review with: git diff
+copy /Y "C:\Projects\humanservices\webmap\winter.html" .
+copy /Y "C:\Projects\humanservices\webmap\winter.js" .
+copy /Y "C:\Projects\humanservices\webmap\winter.css" .
+copy /Y "C:\Projects\humanservices\webmap\winter-donate.json" .

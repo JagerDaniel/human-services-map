@@ -1,0 +1,17 @@
+/* Winter page — layered on styles.css (same palette/tokens). */
+html, body.winter { height: auto; }
+.winter-main { max-width: 46rem; margin: 0 auto; padding: 0.75rem 0.9rem 2rem; }
+.winter-main h2 { font-size: 1.2rem; margin: 1.4rem 0 0.5rem; }
+.callout {
+  background: var(--sidebar); border: 2px solid var(--accent);
+  border-radius: 8px; padding: 0.2rem 1rem 0.8rem;
+}
+.callout h2 { margin-top: 0.8rem; }
+.callout .phone { font-size: 1.4rem; font-weight: 700; }
+.callout .emergency { font-weight: 700; margin-bottom: 0; }
+#shelters .card, #donations .card { margin: 0 0 0.75rem; cursor: default; }
+.badge-hazard { background: #3d6a8c; color: #fff; }
+.give-intro { color: var(--muted); }
+.donate-how { margin: 0.3rem 0; }
+.donate-src { font-size: 0.85rem; color: var(--muted); }
+.fallback { background: var(--sidebar); border-left: 4px solid var(--unknown); padding: 0.6rem 0.9rem; }

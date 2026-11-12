@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Cold-Weather Shelters — Kittitas &amp; Yakima Counties</title>
+  <meta name="description" content="Cold-weather and warming shelters in Kittitas and Yakima counties, Washington, and how to help them." />
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23.16.8/dist/umd/i18next.min.js"
+          integrity="sha384-ZB4j+Y4rqTlON+loxr/YKq9WV8qBuZOqKukqmQVgcZ0GFy93B7TMCSezcrRkfJF5"
+          crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="winter.css" />
+</head>
+<body class="winter">
+  <a class="skip-link" href="#shelters" data-i18n="skipLink">Skip to the shelter list</a>
+  <header>
+    <div class="lang-switch" role="group" aria-label="Language / Idioma">
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="true" lang="en">English</button>
+      <button type="button" class="lang-btn" data-lang="es" aria-pressed="false" lang="es">Español</button>
+    </div>
+    <h1 data-i18n="h1">Cold-Weather Shelters</h1>
+    <p class="tagline" data-i18n="tagline">Kittitas and Yakima counties, Washington.</p>
+  </header>
+
+  <main class="winter-main">
+    <section class="callout" aria-labelledby="callTitle">
+      <h2 id="callTitle" data-i18n="callTitle">Call before you go</h2>
+      <p data-i18n="callBody">Cold-weather shelters often open only on the coldest nights, and dates, times and rules change. Call the number on the card to confirm it is open tonight.</p>
+      <p><a class="phone" href="tel:211">2-1-1</a> <span data-i18n="call211">— dial 2-1-1 any time to be connected with shelter and other help.</span></p>
+      <p class="emergency" data-i18n="emergency">In an emergency, call 9-1-1.</p>
+    </section>
+
+    <section aria-labelledby="sheltersTitle">
+      <h2 id="sheltersTitle" data-i18n="sheltersTitle">Shelters</h2>
+      <p id="status" role="status" data-i18n="statusLoading">Loading shelters…</p>
+      <div id="shelters"></div>
+      <p><a href="index.html" data-i18n="allServices">See all food, housing and mental-health services on the map</a></p>
+    </section>
+
+    <section aria-labelledby="giveTitle">
+      <h2 id="giveTitle" data-i18n="giveTitle">How to help</h2>
+      <p class="give-intro" data-i18n="giveIntro">Shelters run on donated time, food and warm clothing. Needs change week to week, so please contact the shelter before you drop anything off.</p>
+      <div id="donations"></div>
+    </section>
+
+    <footer>
+      <p data-i18n="footerNote">Information is gathered from public sources and checked by a person before it appears here. Hours shown elsewhere on this site are Pacific time.</p>
+      <p><span id="correctionSlot"></span></p>
+    </footer>
+  </main>
+
+  <script src="winter.js"></script>
+</body>
+</html>

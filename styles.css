@@ -335,6 +335,11 @@ main.sheet-expanded .list-content { display: block; }
 .badge-open { background: rgba(63, 125, 92, 0.14); color: var(--open); }
 .badge-closed { background: rgba(181, 80, 46, 0.14); color: var(--closed); }
 .badge-unknown { background: rgba(138, 123, 104, 0.16); color: var(--unknown); }
+/* Seasonal-hazard services: a cool slate pill, deliberately NOT the open
+ * green or closed rust — this badge is a label ("Cold-weather service"),
+ * never a live status, and it must not read like one. */
+.badge-hazard { background: rgba(74, 95, 122, 0.14); color: #4a5f7a; }
+.hazard-note { font-weight: 600; }
 
 .category-line { margin: 0.25rem 0; color: var(--muted); font-size: 0.9rem; }
 .address, .desc, .hours { margin: 0.3rem 0; }

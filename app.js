@@ -33,6 +33,7 @@ const I18N = {
     docTitle: "Food, Housing & Mental Health Help — Kittitas & Yakima Counties",
     metaDescription: "Free map of food, housing, and mental-health services in Kittitas and Yakima counties, Washington.",
     skipLink: "Skip to the list of services",
+    winterLink: "Cold-weather shelters & how to help",
     h1: "Find Help in Kittitas and Yakima Counties",
     tagline: "Free food, housing, and mental-health services in Kittitas and Yakima counties.",
     disclaimerShort: "Please call ahead to confirm details.",
@@ -69,6 +70,18 @@ const I18N = {
     confidentialNote: "Confidential location — call for help. No address is shown for safety.",
     lastVerified: "Last verified {{date}}",
     badge: { open: "Open now", closed: "Closed now", unknown: "Hours unknown" },
+    // Seasonal-hazard services: a short badge label (never open/closed) and a
+    // fail-safe note that sends the reader to the phone.
+    hazardBadge: {
+      cold: "Cold-weather service", heat: "Cooling center",
+      smoke: "Clean-air shelter", wildfire: "Evacuation site",
+    },
+    hazardNote: {
+      cold: "Opens during cold weather. Call to confirm it is open before you go.",
+      heat: "Opens during extreme heat. Call to confirm it is open before you go.",
+      smoke: "Opens during wildfire smoke. Call to confirm it is open before you go.",
+      wildfire: "Opens during wildfire evacuations. Call to confirm before you go.",
+    },
     hoursUnknownLong: "Hours unknown — call to check",
     open247: "Open 24 hours, every day",
     days: { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun", PH: "holidays" },
@@ -79,6 +92,7 @@ const I18N = {
     docTitle: "Ayuda con comida, vivienda y salud mental — Condados de Kittitas y Yakima",
     metaDescription: "Mapa gratuito de servicios de comida, vivienda y salud mental en los condados de Kittitas y Yakima, Washington.",
     skipLink: "Saltar a la lista de servicios",
+    winterLink: "Refugios para clima frío y cómo ayudar",
     h1: "Encuentra ayuda en los condados de Kittitas y Yakima",
     tagline: "Servicios gratuitos de comida, vivienda y salud mental en los condados de Kittitas y Yakima.",
     disclaimerShort: "Por favor llama antes de ir para confirmar la información.",
@@ -113,6 +127,16 @@ const I18N = {
     confidentialNote: "Ubicación confidencial: llama para pedir ayuda. Por seguridad no se muestra la dirección.",
     lastVerified: "Verificado por última vez el {{date}}",
     badge: { open: "Abierto ahora", closed: "Cerrado ahora", unknown: "Horario desconocido" },
+    hazardBadge: {
+      cold: "Servicio de clima frío", heat: "Centro de enfriamiento",
+      smoke: "Refugio de aire limpio", wildfire: "Sitio de evacuación",
+    },
+    hazardNote: {
+      cold: "Abre cuando hace mucho frío. Llama para confirmar que está abierto antes de ir.",
+      heat: "Abre cuando hace mucho calor. Llama para confirmar que está abierto antes de ir.",
+      smoke: "Abre cuando hay humo de incendios. Llama para confirmar que está abierto antes de ir.",
+      wildfire: "Abre durante evacuaciones por incendios. Llama para confirmar antes de ir.",
+    },
     hoursUnknownLong: "Horario desconocido; llama para confirmar",
     open247: "Abierto las 24 horas, todos los días",
     days: { Mo: "Lun", Tu: "Mar", We: "Mié", Th: "Jue", Fr: "Vie", Sa: "Sáb", Su: "Dom", PH: "días festivos" },
@@ -212,6 +236,29 @@ function openState(hoursOsm) {
   } catch (e) {
     return "unknown";
   }
+}
+
+const HAZARD_TYPES = new Set(["cold", "heat", "smoke", "wildfire"]);
+
+function isHazard(svc) {
+  return HAZARD_TYPES.has(svc.hazard_type);
+}
+
+/* The card state used for the badge, filtering, and sorting.
+ *
+ * A hazard-flagged service turns on with a HAZARD, not a clock: a warming
+ * shelter opens on a cold night, a clean-air shelter when smoke arrives. Its
+ * `hours_osm` (e.g. "Nov-Mar 19:00-08:00") is only the season it *might* run,
+ * so a calendar-computed "Open now" would read wrong on a mild night — a
+ * confident, wrong answer on a life-safety service. We fail SAFE instead:
+ * state "hazard" never shows open/closed, is never hidden by "hide closed"
+ * (like "unknown"), and the card directs the reader to the phone.
+ *
+ * When hazard_type is absent (the field not yet in the layer, or a normal
+ * service) this is exactly the old behavior — so the map is unchanged for
+ * every service until one is actually flagged. */
+function serviceState(svc) {
+  return isHazard(svc) ? "hazard" : openState(svc.hours_osm);
 }
 
 /* ---------- plain-language hours ---------- */
@@ -343,7 +390,9 @@ function visibleServices() {
   });
 }
 
-const STATE_RANK = { open: 0, unknown: 1, closed: 2 };
+// Hazard sits with "unknown": relevant and always shown, but its live status
+// can't be computed, so it ranks above "closed" and below a confirmed "open".
+const STATE_RANK = { open: 0, hazard: 1, unknown: 1, closed: 2 };
 
 function renderCards() {
   const wrap = document.getElementById("cards");
@@ -366,8 +415,11 @@ function renderCards() {
 
     const head = el("div", "card-head");
     head.appendChild(el("h2", "name", svc.name));
-    const badge = el("span", "badge badge-" + svc.state, t("badge." + svc.state));
-    head.appendChild(badge);
+    // Hazard services get a seasonal label, never a computed open/closed.
+    const badgeText = isHazard(svc)
+      ? t("hazardBadge." + svc.hazard_type, { defaultValue: t("badge.unknown") })
+      : t("badge." + svc.state);
+    head.appendChild(el("span", "badge badge-" + svc.state, badgeText));
     card.appendChild(head);
 
     card.appendChild(el("p", "category-line",
@@ -383,9 +435,14 @@ function renderCards() {
 
     const desc = describe(svc);
     if (desc) card.appendChild(el("p", "desc", desc));
-    // 24/7 already reads "Open now" from the badge above; a second line
-    // saying "Open 24 hours, every day" is a redundant restatement.
-    if (String(svc.hours_osm || "").trim() !== "24/7") {
+    if (isHazard(svc)) {
+      // No calendar hours for a hazard service — its clock is the weather.
+      // Show why it might open and send the reader to the phone to confirm.
+      card.appendChild(el("p", "hours hazard-note",
+        t("hazardNote." + svc.hazard_type, { defaultValue: t("hoursUnknownLong") })));
+    } else if (String(svc.hours_osm || "").trim() !== "24/7") {
+      // 24/7 already reads "Open now" from the badge above; a second line
+      // saying "Open 24 hours, every day" is a redundant restatement.
       card.appendChild(el("p", "hours", humanHours(svc.hours_osm)));
     }
 
@@ -430,7 +487,7 @@ function applyMapFilter() {
 }
 
 function refresh() {
-  for (const svc of services) svc.state = openState(svc.hours_osm);
+  for (const svc of services) svc.state = serviceState(svc);
   renderCards();
   applyMapFilter();
 }
