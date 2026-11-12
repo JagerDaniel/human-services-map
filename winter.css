@@ -1,6 +1,17 @@
 /* Winter page — layered on styles.css (same palette/tokens). */
 html, body.winter { height: auto; }
-.winter-main { max-width: 46rem; margin: 0 auto; padding: 0.75rem 0.9rem 2rem; }
+/* styles.css turns every <main> into the map/sidebar grid (and a two-column
+   grid at >=900px). This page is a single reading column, so reset it at every
+   width — `main.winter-main` outranks the bare `main` rules, including the
+   desktop media query. */
+body.winter { display: block; }
+main.winter-main {
+  display: block;
+  max-width: 46rem; margin: 0 auto; padding: 0.75rem 0.9rem 2rem;
+  grid-template-columns: none; grid-template-areas: none; grid-template-rows: none;
+}
+.back-link { color: #fff; font-weight: 700; text-decoration: underline; }
+.winter header .tagline { margin-top: 0.3rem; }
 .winter-main h2 { font-size: 1.2rem; margin: 1.4rem 0 0.5rem; }
 .callout {
   background: var(--sidebar); border: 2px solid var(--accent);
